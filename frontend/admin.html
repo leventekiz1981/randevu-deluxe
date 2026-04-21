@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="shortcut icon" href="favicon.svg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Super Admin — Randevu Deluxe</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+  <style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root,[data-theme="dark"]{
+  --bg:#07080C; --s1:#0D0F15; --s2:#121520; --s3:#181C26; --s4:#1E2330;
+  --br:rgba(255,255,255,.06); --br2:rgba(255,255,255,.11);
+  --tx:#E8EAF0; --tx2:#8A8FA8; --tx3:#565B72;
+  --accent:#00C8FF; --gold:#C9A84C; --gold2:#E2C06A;
+  --green:#22C55E; --danger:#EF4444; --purple:#8B5CF6; --orange:#F59E0B;
+  --sidebar-w:220px;
+}
+[data-theme="light"]{
+  --bg:#F0F2F6; --s1:#FFFFFF; --s2:#F8F9FB; --s3:#EEF0F5; --s4:#E2E5ED;
+  --br:rgba(0,0,0,.08); --br2:rgba(0,0,0,.14);
+  --tx:#111827; --tx2:#374151; --tx3:#9CA3AF;
+  --accent:#0099CC; --gold:#9A6D1A; --gold2:#B8882A;
+  --green:#16A34A; --danger:#DC2626; --purple:#7C3AED; --orange:#D97706;
+}
+html{font-size:16px;scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;overflow-x:hidden;transition:background .3s,color .3s}
+
+/* ══ SIDEBAR ══════════════════════════════════ */
+.sidebar{
+  position:fixed;left:0;top:0;bottom:0;width:var(--sidebar-w);
+  background:var(--s1);border-right:1px solid var(--br);
+  display:flex;flex-direction:column;z-index:200;
+  transform:translateX(-100%);transition:transform .25s, background .3s, border-color .3s;
+}
+.sidebar.open{transform:translateX(0)}
+@media(min-width:900px){
+  .sidebar{transform:translateX(0)}
+  .main{margin-left:var(--sidebar-w)}
+  .topbar{left:var(--sidebar-w)}
+  .sidebar-overlay{display:none!important}
+}
+.sb-logo{
+  padding:20px 18px 16px;border-bottom:1px solid var(--br);
+  font-family:'Playfair Display',serif;font-size:1.05rem;
+  display:flex;align-items:center;gap:10px;
+}
+.sb-logo-accent{color:var(--accent)}
+.sb-logo small{display:block;font-family:'DM Sans',sans-serif;font-size:.58rem;color:var(--tx3);letter-spacing:2.5px;text-transform:uppercase;margin-top:2px}
+.sb-badge{
+  margin-left:auto;font-size:.58rem;font-weight:700;padding:2px 7px;
+  border-radius:5px;background:rgba(0,200,255,.12);color:var(--accent);
+  letter-spacing:1px;text-transform:uppercase;flex-shrink:0
+}
+.sb-section{padding:10px 10px 4px;font-size:.58rem;letter-spacing:2px;text-transform:uppercase;color:var(--tx3);font-weight:700}
+.sb-item{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 14px;margin:1px 8px;border-radius:9px;
+  font-size:.84rem;color:var(--tx2);cursor:pointer;
+  border:none;background:transparent;font-family:inherit;
+  text-align:left;transition:all .15s;width:calc(100% - 16px);
+}
+.sb-item:hover{background:var(--s3);color:var(--tx)}
+.sb-item.active{background:rgba(0,200,255,.1);color:var(--accent);font-weight:600}
+.sb-item .sb-icon{font-size:1rem;width:20px;text-align:center;flex-shrink:0}
+.sb-item .sb-badge-count{
+  margin-left:auto;background:var(--danger);color:#fff;
+  font-size:.6rem;font-weight:700;padding:1px 6px;border-radius:99px;
+}
+.sb-footer{margin-top:auto;padding:14px 18px;border-top:1px solid var(--br);font-size:.66rem;color:var(--tx3)}
+
+/* ══ TOPBAR ═══════════════════════════════════ */
+.topbar{
+  position:sticky;top:0;left:0;right:0;height:56px;z-index:100;
+  background:rgba(7,8,12,.85);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--br);
+  display:flex;align-items:center;gap:12px;padding:0 16px;
+  transition:background .3s, border-color .3s;
+}
+[data-theme="light"] .topbar{background:rgba(255,255,255,.92)}
+.topbar-menu{background:none;border:none;color:var(--tx2);font-size:1.2rem;cursor:pointer;padding:4px;display:flex;align-items:center}
+@media(min-width:900px){.topbar-menu{display:none}}
+.topbar-title{font-size:.92rem;font-weight:600;flex:1}
+.topbar-admin{display:flex;align-items:center;gap:8px}
+.tb-av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#0077FF);display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:700;color:#fff;flex-shrink:0}
+.tb-name{font-size:.8rem;font-weight:600;display:none}
+@media(min-width:640px){.tb-name{display:block}}
+
+/* ══ MAIN + VIEWS ══════════════════════════════ */
+.main{min-height:100vh;padding-bottom:32px}
+.view{display:none;padding:16px}
+.view.active{display:block}
+.page-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px}
+.page-hdr h1{font-size:1.1rem;font-weight:700}
+.page-hdr-sub{font-size:.76rem;color:var(--tx2);margin-top:2px}
+
+/* ══ CARDS ════════════════════════════════════ */
+.card{background:var(--s1);border:1px solid var(--br);border-radius:14px;padding:16px;margin-bottom:12px}
+.card-title{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--tx3);margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
+.card-title-badge{font-size:.66rem;padding:2px 8px;border-radius:5px;background:rgba(0,200,255,.1);color:var(--accent);letter-spacing:0;text-transform:none;font-weight:600}
+
+/* ══ KPI GRID ══════════════════════════════════ */
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+@media(min-width:640px){.kpi-grid{grid-template-columns:repeat(4,1fr)}}
+.kpi{
+  background:var(--s1);border:1px solid var(--br);border-radius:14px;
+  padding:14px 16px;position:relative;overflow:hidden;
+}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.kpi.blue::before{background:linear-gradient(90deg,var(--accent),transparent)}
+.kpi.gold::before{background:linear-gradient(90deg,var(--gold),transparent)}
+.kpi.green::before{background:linear-gradient(90deg,var(--green),transparent)}
+.kpi.purple::before{background:linear-gradient(90deg,var(--purple),transparent)}
+.kpi.red::before{background:linear-gradient(90deg,var(--danger),transparent)}
+.kpi-lbl{font-size:.62rem;text-transform:uppercase;letter-spacing:2px;color:var(--tx3);margin-bottom:6px}
+.kpi-val{font-family:'Playfair Display',serif;font-size:1.7rem;line-height:1}
+.kpi-val.blue{color:var(--accent)}.kpi-val.gold{color:var(--gold)}.kpi-val.green{color:var(--green)}.kpi-val.purple{color:var(--purple)}.kpi-val.red{color:var(--danger)}
+.kpi-chg{font-size:.7rem;margin-top:5px;color:var(--tx3)}
+.kpi-chg.up{color:var(--green)}.kpi-chg.dn{color:var(--danger)}
+
+/* ══ TABLE ════════════════════════════════════ */
+.tbl{width:100%;border-collapse:collapse;font-size:.82rem}
+.tbl th{text-align:left;padding:8px 10px;font-size:.64rem;text-transform:uppercase;letter-spacing:1px;color:var(--tx3);border-bottom:1px solid var(--br);font-weight:700}
+.tbl td{padding:10px 10px;border-bottom:1px solid var(--br);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:rgba(255,255,255,.02)}
+.tbl tr.clickable{cursor:pointer}
+.tbl tr.clickable:hover td{background:rgba(0,200,255,.04)}
+
+/* ══ CHIPS ════════════════════════════════════ */
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:.64rem;font-weight:700;padding:2px 8px;border-radius:5px;text-transform:uppercase;letter-spacing:.8px;white-space:nowrap}
+.chip-free{background:rgba(90,122,138,.2);color:#5A7A8A}
+.chip-std{background:rgba(0,200,255,.12);color:var(--accent)}
+.chip-pro{background:rgba(255,184,48,.12);color:var(--orange)}
+.chip-lux{background:rgba(139,92,246,.15);color:var(--purple)}
+.chip-active{background:rgba(34,197,94,.12);color:var(--green)}
+.chip-paused{background:rgba(239,68,68,.12);color:var(--danger)}
+.chip-open{background:rgba(239,68,68,.12);color:var(--danger)}
+.chip-waiting{background:rgba(245,158,11,.12);color:var(--orange)}
+.chip-resolved{background:rgba(34,197,94,.12);color:var(--green)}
+
+/* ══ BUTTONS ══════════════════════════════════ */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:9px;border:none;font-family:inherit;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap}
+.btn-accent{background:rgba(0,200,255,.15);color:var(--accent);border:1px solid rgba(0,200,255,.25)}
+.btn-accent:hover{background:rgba(0,200,255,.25)}
+.btn-gold{background:var(--gold);color:#080808}
+.btn-gold:hover{background:var(--gold2)}
+.btn-danger{background:rgba(239,68,68,.12);color:var(--danger);border:1px solid rgba(239,68,68,.2)}
+.btn-danger:hover{background:rgba(239,68,68,.22)}
+.btn-ghost{background:transparent;color:var(--tx2);border:1px solid var(--br2)}
+.btn-ghost:hover{background:var(--s3);color:var(--tx)}
+.btn-sm{padding:5px 10px;font-size:.74rem}
+.btn-full{width:100%;justify-content:center}
+
+/* ══ FORM ELEMENTS ════════════════════════════ */
+.form-row{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
+.form-row label{font-size:.7rem;color:var(--tx2);font-weight:600}
+.inp{background:var(--s3);border:1px solid var(--br2);border-radius:9px;color:var(--tx);font-family:inherit;font-size:.84rem;padding:9px 12px;width:100%;transition:border-color .15s}
+.inp:focus{outline:none;border-color:var(--accent)}
+.inp-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238A8FA8' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+.form-2col{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.form-3col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--br)}
+.toggle-row:last-child{border-bottom:none}
+.toggle-label{font-size:.84rem;font-weight:500}
+.toggle-desc{font-size:.72rem;color:var(--tx2);margin-top:2px}
+.toggle-sw{position:relative;display:inline-block;width:40px;height:22px;flex-shrink:0}
+.toggle-sw input{display:none}
+.toggle-sw-slider{position:absolute;inset:0;background:var(--s4);border-radius:99px;cursor:pointer;transition:.2s}
+.toggle-sw-slider::before{content:'';position:absolute;left:3px;top:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:.2s}
+.toggle-sw input:checked + .toggle-sw-slider{background:var(--accent)}
+.toggle-sw input:checked + .toggle-sw-slider::before{transform:translateX(18px)}
+
+/* ══ PROGRESS BAR ══════════════════════════════ */
+.progress-track{height:6px;background:var(--s3);border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;border-radius:3px;transition:width .4s}
+.fill-safe{background:var(--green)}.fill-warn{background:var(--orange)}.fill-danger{background:var(--danger)}
+
+/* ══ ALERTS ═══════════════════════════════════ */
+.alert{display:flex;align-items:flex-start;gap:10px;padding:12px;border-radius:10px;border:1px solid transparent;margin-bottom:8px}
+.alert.warn{background:rgba(245,158,11,.07);border-color:rgba(245,158,11,.2)}
+.alert.info{background:rgba(0,200,255,.07);border-color:rgba(0,200,255,.15)}
+.alert.success{background:rgba(34,197,94,.07);border-color:rgba(34,197,94,.15)}
+.alert-icon{font-size:1.1rem;flex-shrink:0;margin-top:1px}
+.alert-text{font-size:.82rem;line-height:1.5}
+.alert-text strong{display:block;font-size:.85rem;margin-bottom:2px}
+.alert.warn strong{color:var(--orange)}.alert.info strong{color:var(--accent)}.alert.success strong{color:var(--green)}
+
+/* ══ REVENUE CHART ═════════════════════════════ */
+.rev-chart{display:flex;align-items:flex-end;gap:5px;height:110px;padding:0 2px}
+.rev-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;height:100%;justify-content:flex-end}
+.rev-bar{width:100%;border-radius:4px 4px 0 0;background:var(--s3);min-height:4px;transition:height .5s}
+.rev-bar.now{background:var(--accent)}
+.rev-lbl{font-size:.6rem;color:var(--tx3)}
+
+/* ══ PLAN BARS ═════════════════════════════════ */
+.plan-bar-row{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.plan-bar-row:last-child{margin-bottom:0}
+.plan-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.plan-name-lbl{font-size:.82rem;font-weight:600;min-width:68px}
+.plan-track{flex:1;height:7px;background:var(--s3);border-radius:4px;overflow:hidden}
+.plan-fill-bar{height:100%;border-radius:4px;transition:width .8s}
+.plan-count-lbl{font-size:.74rem;color:var(--tx2);min-width:52px;text-align:right}
+
+/* ══ SALON LIST ════════════════════════════════ */
+.salon-row{display:flex;align-items:center;gap:10px;padding:11px 12px;background:var(--s2);border:1px solid var(--br);border-radius:11px;cursor:pointer;transition:all .15s;margin-bottom:7px}
+.salon-row:hover{border-color:rgba(0,200,255,.25);background:rgba(0,200,255,.04)}
+.salon-av{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:.84rem;font-weight:700;color:#fff;flex-shrink:0}
+.salon-info{flex:1;min-width:0}
+.salon-name-row{font-size:.88rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.salon-meta{font-size:.72rem;color:var(--tx2);margin-top:2px;display:flex;align-items:center;gap:6px}
+.status-dot{width:6px;height:6px;border-radius:50%;display:inline-block;flex-shrink:0}
+.dot-on{background:var(--green);box-shadow:0 0 5px var(--green)}
+.dot-off{background:var(--tx3)}
+.salon-right{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0}
+.wa-bar-wrap{display:flex;align-items:center;gap:6px;width:100%}
+.wa-bar-lbl{font-size:.68rem;color:var(--tx2);white-space:nowrap}
+.wa-bar-track{flex:1;height:5px;background:var(--s3);border-radius:3px;overflow:hidden;min-width:40px}
+.wa-bar-fill{height:100%;border-radius:3px}
+
+/* ══ HIZMET LIST ═══════════════════════════════ */
+.hizmet-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--br)}
+.hizmet-row:last-child{border-bottom:none}
+.hizmet-cat{font-size:.64rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--tx3);padding:8px 0 4px;display:block}
+.hizmet-name{flex:1;font-size:.86rem;font-weight:500}
+.hizmet-dur{font-size:.74rem;color:var(--tx2);min-width:44px}
+.hizmet-price{font-size:.84rem;font-weight:700;color:var(--gold);min-width:48px;text-align:right}
+.hizmet-actions{display:flex;gap:5px}
+
+/* ══ TICKET ROW ════════════════════════════════ */
+.ticket-row{padding:12px;background:var(--s2);border:1px solid var(--br);border-radius:11px;margin-bottom:8px;cursor:pointer;transition:all .15s}
+.ticket-row:hover{border-color:var(--br2)}
+.ticket-hdr{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.ticket-subject{font-size:.88rem;font-weight:600;flex:1}
+.ticket-meta{font-size:.72rem;color:var(--tx2)}
+
+/* ══ MODAL ════════════════════════════════════ */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);display:none;align-items:flex-end;z-index:500;backdrop-filter:blur(4px)}
+.modal-overlay.open{display:flex}
+.modal-sheet{background:var(--s1);border-radius:20px 20px 0 0;width:100%;max-height:90vh;overflow-y:auto;border-top:1px solid var(--br2)}
+@media(min-width:640px){
+  .modal-overlay{align-items:center;justify-content:center}
+  .modal-sheet{border-radius:18px;width:520px;max-height:85vh;border:1px solid var(--br2)}
+}
+.modal-handle{width:36px;height:4px;background:var(--br2);border-radius:2px;margin:10px auto 4px}
+@media(min-width:640px){.modal-handle{display:none}}
+.modal-hdr{display:flex;align-items:center;justify-content:space-between;padding:14px 18px 10px;border-bottom:1px solid var(--br)}
+.modal-title{font-size:1rem;font-weight:700}
+.modal-close{background:none;border:none;color:var(--tx2);font-size:1.1rem;cursor:pointer;padding:4px 7px;border-radius:7px}
+.modal-close:hover{background:var(--s3);color:var(--tx)}
+.modal-body{padding:16px 18px}
+.modal-footer{padding:12px 18px;border-top:1px solid var(--br);display:flex;gap:8px}
+
+/* ══ SIDEBAR OVERLAY (mobile) ══════════════════ */
+.sidebar-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:190;display:none}
+.sidebar-overlay.open{display:block}
+
+/* ══ TOAST ════════════════════════════════════ */
+.toast{
+  position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);
+  background:var(--s2);border:1px solid var(--br2);border-radius:10px;
+  padding:10px 18px;font-size:.84rem;font-weight:600;color:var(--tx);
+  z-index:9999;transition:transform .3s;white-space:nowrap;
+  box-shadow:0 8px 24px rgba(0,0,0,.5);
+}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+/* ══ SEARCH BAR ════════════════════════════════ */
+.search-bar{display:flex;align-items:center;gap:8px;background:var(--s2);border:1px solid var(--br2);border-radius:9px;padding:0 12px;margin-bottom:12px}
+.search-bar input{flex:1;background:none;border:none;color:var(--tx);font-family:inherit;font-size:.84rem;padding:9px 0;outline:none}
+.search-bar span{color:var(--tx3);font-size:.9rem}
+
+/* ══ SCROLLBAR ════════════════════════════════ */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--s4);border-radius:2px}
+  </style>
+</head>
+<body>
+
+<!-- ══ SIDEBAR OVERLAY ══ -->
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+<!-- ══ SIDEBAR ══ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sb-logo">
+    <div>
+      <span class="sb-logo-accent">Randevu</span>Deluxe
+      <small>Super Admin</small>
+    </div>
+    <span class="sb-badge">Admin</span>
+  </div>
+
+  <div style="overflow-y:auto;flex:1;padding:8px 0">
+    <div class="sb-section">Genel</div>
+    <button class="sb-item active" id="sb-overview"    onclick="showView('overview')">   <span class="sb-icon">📊</span> Genel Bakış</button>
+    <button class="sb-item"        id="sb-salonlar"    onclick="showView('salonlar')">   <span class="sb-icon">✂️</span>  Salonlar</button>
+    <button class="sb-item"        id="sb-kayitlar"    onclick="showView('kayitlar')">   <span class="sb-icon">🆕</span>  Yeni Kayıtlar<span class="sb-badge-count" id="sb-new-count">5</span></button>
+
+    <div class="sb-section">Katalog</div>
+    <button class="sb-item"        id="sb-hizmetler"   onclick="showView('hizmetler')">  <span class="sb-icon">💈</span>  Branchen</button>
+    <button class="sb-item"        id="sb-abonelikler" onclick="showView('abonelikler')"><span class="sb-icon">💎</span>  Abonelikler</button>
+
+    <div class="sb-section">İzleme</div>
+    <button class="sb-item"        id="sb-whatsapp"    onclick="showView('whatsapp')">   <span class="sb-icon">💬</span>  WhatsApp</button>
+    <button class="sb-item"        id="sb-raporlar"    onclick="showView('raporlar')">   <span class="sb-icon">📈</span>  Raporlar</button>
+    <button class="sb-item"        id="sb-destek"      onclick="showView('destek')">     <span class="sb-icon">🎫</span>  Destek<span class="sb-badge-count" id="sb-ticket-count">2</span></button>
+
+    <div class="sb-section">Yönetim</div>
+    <button class="sb-item"        id="sb-ayarlar"     onclick="showView('ayarlar')">    <span class="sb-icon">⚙️</span>  Sistem Ayarları</button>
+  </div>
+
+  <div class="sb-footer">v2.1 · Build 0417 · © 2026 Soft-Deluxe</div>
+</aside>
+
+<!-- ══ TOPBAR ══ -->
+<div class="topbar">
+  <button class="topbar-menu" onclick="toggleSidebar()">☰</button>
+  <div class="topbar-title" id="topbar-title">Genel Bakış</div>
+  <div class="topbar-admin">
+    <button id="admin-theme-btn" onclick="toggleAdminTheme()"
+      style="background:var(--s3);border:1px solid var(--br2);color:var(--tx2);
+             border-radius:8px;padding:5px 11px;font-size:.78rem;font-weight:600;
+             cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;
+             transition:all .15s;white-space:nowrap">
+      <span id="admin-theme-icon">☀️</span>
+      <span id="admin-theme-lbl">Light</span>
+    </button>
+    <div class="tb-av">SA</div>
+    <span class="tb-name">Super Admin</span>
+  </div>
+</div>
+
+<!-- ══ MAIN ══ -->
+<main class="main">
+
+<!-- ─────────────────────────────────────────
+     VIEW: GENEL BAKIŞ
+───────────────────────────────────────────── -->
+<div class="view active" id="view-overview">
+  <div class="page-hdr" style="margin-top:8px">
+    <div><h1>Genel Bakış</h1><div class="page-hdr-sub" id="ov-date"></div></div>
+    <button class="btn btn-accent btn-sm" onclick="showView('raporlar')">📈 Detaylı Rapor</button>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi blue"><div class="kpi-lbl">Toplam Salon</div><div class="kpi-val blue" id="ov-total">247</div><div class="kpi-chg up">↑ 12 bu hafta</div></div>
+    <div class="kpi gold"><div class="kpi-lbl">Aylık Gelir (MRR)</div><div class="kpi-val gold" id="ov-mrr">₺48.6K</div><div class="kpi-chg up">↑ %23</div></div>
+    <div class="kpi green"><div class="kpi-lbl">Aktif Salon</div><div class="kpi-val green" id="ov-active">231</div><div class="kpi-chg up">%94 aktif</div></div>
+    <div class="kpi purple"><div class="kpi-lbl">Dönüşüm</div><div class="kpi-val purple">%34</div><div class="kpi-chg up">Free→Ücretli</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Aylık Gelir Trendi <span class="card-title-badge">Son 8 ay</span></div>
+    <div class="rev-chart" id="ov-chart"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Paket Dağılımı <span class="card-title-badge">247 salon</span></div>
+    <div id="ov-plan-bars"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Aksiyon Gerekli</div>
+    <div class="alert warn"><div class="alert-icon">⚠️</div><div class="alert-text"><strong>8 salon WA limitine yakın</strong>Standart paket limitinin %85'ini aştı — Upgrade teklif et.</div></div>
+    <div class="alert info"><div class="alert-icon">💡</div><div class="alert-text"><strong>23 ücretsiz salon aktif kullanıcı</strong>30+ randevu/ay — Ücretli pakete geçirme fırsatı.</div></div>
+    <div class="alert success"><div class="alert-icon">🎉</div><div class="alert-text"><strong>Bu ay 12 yeni ücretli abonelik</strong>Dönüşüm oranı rekor: %34.</div></div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────
+     VIEW: SALONLAR
+───────────────────────────────────────────── -->
+<div class="view" id="view-salonlar">
+  <div class="page-hdr" style="margin-top:8px">
+    <div><h1>Salonlar</h1><div class="page-hdr-sub" id="salon-count-lbl"></div></div>
+    <button class="btn btn-gold btn-sm" onclick="openNewSalonModal()">➕ Salon Ekle</button>
+  </div>
+  <div class="search-bar">
+    <span>🔍</span>
+    <input id="salon-search" placeholder="Salon adı veya şehir ara…" oninput="filterSalons()">
+  </div>
+  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px" id="salon-filter-chips">
+    <button class="btn btn-accent btn-sm" data-filter="all"  onclick="setSalonFilter('all',this)">Tümü</button>
+    <button class="btn btn-ghost btn-sm" data-filter="free" onclick="setSalonFilter('free',this)">Ücretsiz</button>
+    <button class="btn btn-ghost btn-sm" data-filter="std"  onclick="setSalonFilter('std',this)">Standart</button>
+    <button class="btn btn-ghost btn-sm" data-filter="pro"  onclick="setSalonFilter('pro',this)">Pro</button>
+    <button class="btn btn-ghost btn-sm" data-filter="lux"  onclick="setSalonFilter('lux',this)">Lüks</button>
+  </div>
+  <div id="salon-list"></div>
+</div>
+
+<!-- ─────────────────────────────────────────
+     VIEW: YENİ KAYITLAR
+───────────────────────────────────────────── -->
+<div class="view" id="view-kayitlar">
+  <div class="page-hdr" style="margin-top:8px">
+    <div><h1>Yeni Kayıtlar</h1><div class="page-hdr-sub">Son 14 gün</div></div>
+  </div>
+  <div class="kpi-grid" style="grid-template-columns:1fr 1fr 1fr">
+    <div class="kpi blue"><div class="kpi-lbl">Bu Hafta</div><div class="kpi-val blue">12</div><div class="kpi-chg up">↑ 3</div></div>
+    <div class="kpi green"><div class="kpi-lbl">Bu Ay</div><div class="kpi-val green">47</div><div class="kpi-chg up">↑ %18</div></div>
+    <div class="kpi gold"><div class="kpi-lbl">Dönüşüm</div><div class="kpi-val gold">%34</div><div class="kpi-chg up">Free→Ücretli</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Son Kayıtlar</div>
+    <div id="kayitlar-list"></div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────
+     VIEW: BRANCHEN / HİZMET KATEGORİLERİ
+───────────────────────────────────────────── -->
+<div class="view" id="view-hizmetler">
+  <div class="page-hdr" style="margin-top:8px">
+    <div>
+      <h1>Branchen & Hizmet Şablonları</h1>
+      <div class="page-hdr-sub">Gewerbearten verwalten · Salon-Betreiber legt eigene Hizmetler im Dashboard an</div>
+    </div>
+    <button class="btn btn-gold btn-sm" onclick="openBranchModal(null)">➕ Branche Ekle</button>
+  </div>
+  <div class="alert info" style="margin-bottom:12px">
+    <div class="alert-icon">ℹ️</div>
+    <div class="alert-text">
+      <strong>Nasıl çalışır?</strong>
+      Her branche için hizmet şablonları tanımlarsınız. Salon sahibi onboarding'de branchen'ini seçer ve şablonlar önerilir — fiyatları ve hizmetlerini kendisi belirler.
+    </div>
+  </div>
+  <div id="hizmet-catalog"></div>
+</div>
+
+<!-- ─────────────────────────────────────────
+     VIEW: ABONELİKLER
+───────────────────────────────────────────── -->
+<div class="view" id="view-abonelikler">
+  <div class="page-hdr" style="margin-top:8px">
+    <div><h1>Abonelik Planları</h1><div class="page-hdr-sub">Fiyat & limit ayarları · WhatsApp ayrı eklenti paketi olarak satılır</div></div>
+  </div>
+
+  <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--tx3);margin-bottom:10px">📋 Ana Planlar</div>
+  <div id="plan-cards-edit"></div>
+
+  <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#25D366;margin:24px 0 10px">💬 WhatsApp Eklenti Paketleri — tekrar eklenebilir (zubuchbar)</div>
+  <div style="font-size:.78rem;color:var(--tx2);margin-bottom:12px;padding:10px 14px;background:rgba(37,211,102,.06);border:1px solid rgba(37,211,102,.2);border-radius:8px">
+    Başlangıç hariç tüm planlara eklenebilir. Bir salon aynı paketten birden fazla satın alabilir — örn. 3× Paket 100 = 300 mesaj/ay.
+  </div>
+  <div id="wa-addon-cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px"></div>
+
+  <div class="card" style="margin-top:24px">
+    <div class="card-title">Paket Başına Abonelik Dağılımı</div>
+    <div id="abo-plan-bars"></div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────
+     VIEW: WHATSAPP
+───────────────────────────────────────────── -->
+<div class="view" id="view-whatsapp">
+  <div class="page-hdr" style="margin-top:8px">
+    <div><h1>WhatsApp Kullanımı</h1></div>
+  </div>
+  <div class="kpi-grid">
+    <div class="kpi green"><div class="kpi-lbl">Bu Ay Toplam</div><div class="kpi-val green">18.4K</div><div class="kpi-chg up">mesaj</div></div>
+    <div class="kpi gold"><div class="kpi-lbl">Limit Aşanlar</div><div class="kpi-val gold">8</div><div class="kpi-chg">salon</div></div>
+    <div class="kpi blue"><div class="kpi-lbl">Ort. / Salon</div><div class="kpi-val blue">74</div><div class="kpi-chg">mesaj/ay</div></div>
+    <div class="kpi purple"><div class="kpi-lbl">Maliyet</div><div class="kpi-val purple">₺0</div><div class="kpi-chg up">wa.me ücretsiz ✓</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Limitine Yakın Salonlar <span class="card-title-badge">&gt; %80</span></div>
+    <div id="wa-danger-list"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Paket Başına WA Limiti</div>
+    <div id="wa-limit-grid"></div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────
+     VIEW: RAPORLAR
+───────────────────────────────────────────── -->
+<div class="view" id="view-raporlar">
+  <div class="page-hdr" style="margin-top:8px">
+    <div><h1>Raporlar</h1></div>
+    <button class="btn btn-ghost btn-sm" onclick="exportAdminCSV()">📥 CSV Export</button>
+  </div>
+  <div class="kpi-grid">
+    <div class="kpi gold"><div class="kpi-lbl">Yıllık Gelir (ARR)</div><div class="kpi-val gold">₺583K</div><div class="kpi-chg up">↑ %41</div></div>
+    <div class="kpi blue"><div class="kpi-lbl">Ortalama Abonelik</div><div class="kpi-val blue">₺197</div><div class="kpi-chg">/ salon / ay</div></div>
+    <div class="kpi red"><div class="kpi-lbl">Churn Rate</div><div class="kpi-val red">%2.1</div><div class="kpi-chg dn">↑ %0.3 geçen ay</div></div>
+    <div class="kpi green"><div class="kpi-lbl">LTV (ort.)</div><div class="kpi-val green">₺9.4K</div><div class="kpi-chg up">↑ %12</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Aylık Gelir <span class="card-title-badge">Son 8 ay</span></div>
+    <div class="rev-chart" id="rapor-chart"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Şehir Bazlı Dağılım</div>
+    <table class="tbl" id="city-tbl">
+      <thead><tr><th>Şehir</th><th>Salon</th><th>Ücretli</th><th>MRR Payı</th></tr></thead>
+      <tbody id="city-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────
+     VIEW: DESTEK
+───────────────────────────────────────────── -->
+<div class="view" id="view-destek">
+  <div class="page-hdr" style="margin-top:8px">
+    <div><h1>Destek Talepleri</h1></div>
+    <button class="btn btn-accent btn-sm" onclick="showView('salonlar')">💬 Salon Mesajla</button>
+  </div>
+  <div class="kpi-grid" style="grid-template-columns:1fr 1fr 1fr">
+    <div class="kpi red"><div class="kpi-lbl">Açık</div><div class="kpi-val red" id="tk-open">2</div></div>
+    <div class="kpi gold"><div class="kpi-lbl">Bekliyor</div><div class="kpi-val gold" id="tk-wait">1</div></div>
+    <div class="kpi green"><div class="kpi-lbl">Çözüldü (Bu Ay)</div><div class="kpi-val green">14</div></div>
+  </div>
+  <div id="ticket-list"></div>
+</div>
+
+<!-- ─────────────────────────────────────────
+     VIEW: SİSTEM AYARLARI
+───────────────────────────────────────────── -->
+<div class="view" id="view-ayarlar">
+  <div class="page-hdr" style="margin-top:8px">
+    <div><h1>Sistem Ayarları</h1></div>
+    <button class="btn btn-gold btn-sm" onclick="saveSystemSettings()">💾 Kaydet</button>
+  </div>
+
+  <!-- Platform Bilgileri -->
+  <div class="card">
+    <div class="card-title">🏢 Platform Bilgileri</div>
+    <div class="form-2col">
+      <div class="form-row"><label>Platform Adı</label><input class="inp" id="cfg-platform-name" value="Randevu Deluxe"></div>
+      <div class="form-row"><label>Domain</label><input class="inp" id="cfg-domain" value="randevudeluxe.com"></div>
+      <div class="form-row"><label>Destek E-posta</label><input class="inp" id="cfg-support-email" value="destek@randevudeluxe.com"></div>
+      <div class="form-row"><label>Destek Telefon</label><input class="inp" id="cfg-support-phone" value="+90 850 000 00 00"></div>
+    </div>
+    <div class="form-row"><label>Hoş Geldiniz Mesajı (Yeni Kayıt E-postası)</label><textarea class="inp" id="cfg-welcome-msg" rows="3" style="resize:vertical">Randevu Deluxe'e hoş geldiniz! Hesabınız hazır. 5 dakikada salonunuzu tanımlayın.</textarea></div>
+  </div>
+
+  <!-- Plan Fiyatları -->
+  <div class="card">
+    <div class="card-title">💎 Plan Fiyatları & Limitler <span class="card-title-badge">Yıllık · WA ayrı eklenti paketi</span></div>
+    <table class="tbl" id="plan-prices-tbl">
+      <thead><tr><th>Plan</th><th>Yıllık Fiyat (₺)</th><th>Çalışan Limiti</th><th>Randevu Limiti</th><th>Özellikler</th></tr></thead>
+      <tbody id="plan-prices-body"></tbody>
+    </table>
+    <button class="btn btn-accent btn-sm" style="margin-top:10px" onclick="savePlanPrices()">💾 Fiyatları Kaydet</button>
+  </div>
+
+  <!-- WA Ödeme Bilgileri -->
+  <div class="card">
+    <div class="card-title">💬 WA Kredi Ödeme Ayarları
+      <span class="card-title-badge">Havale/EFT · Salon panelinde gösterilir</span>
+    </div>
+
+    <div style="background:rgba(37,211,102,.06);border:1px solid rgba(37,211,102,.18);
+                border-radius:10px;padding:12px 14px;margin-bottom:16px;font-size:.78rem;color:var(--tx2)">
+      💡 Bu bilgiler, salon sahipleri WA Kredi paketi satın almak istediğinde ödeme modalında gösterilir.
+      Referans numarası otomatik olarak <strong>WA-[SalonID]-[PaketAdet]</strong> formatında oluşturulur.
+    </div>
+
+    <div class="form-2col">
+      <div class="form-row">
+        <label>Banka Adı</label>
+        <input class="inp" id="wa-bank-name" placeholder="Ziraat Bankası" value="Ziraat Bankası">
+      </div>
+      <div class="form-row">
+        <label>Hesap Sahibi (Şirket Adı)</label>
+        <input class="inp" id="wa-account-holder" placeholder="Randevu Deluxe Ltd. Şti." value="Randevu Deluxe Ltd. Şti.">
+      </div>
+    </div>
+
+    <div class="form-row" style="margin-bottom:12px">
+      <label>IBAN</label>
+      <div style="display:flex;gap:8px">
+        <input class="inp" id="wa-iban" placeholder="TR00 0001 0002 0003 0004 0005 00"
+               value="TR00 0001 0002 0003 0004 0005 00" style="flex:1;font-family:monospace;letter-spacing:.5px">
+        <button onclick="validateIban()" class="btn btn-accent btn-sm" style="white-space:nowrap">✓ Doğrula</button>
+      </div>
+      <div style="font-size:.68rem;color:var(--tx3);margin-top:4px">TR ile başlayan 26 karakter IBAN numarası</div>
+    </div>
+
+    <div class="form-2col">
+      <div class="form-row">
+        <label>WhatsApp Destek Numarası <span style="color:var(--tx3);font-weight:400">(90 ile başlayın)</span></label>
+        <input class="inp" id="wa-phone" placeholder="905321234567" value="905321234567"
+               style="font-family:monospace">
+      </div>
+      <div class="form-row">
+        <label>Aktivasyon Süresi</label>
+        <select class="inp" id="wa-activation-time">
+          <option value="1">En geç 1 saat içinde</option>
+          <option value="4">En geç 4 saat içinde</option>
+          <option value="24" selected>En geç 24 saat içinde</option>
+          <option value="48">En geç 2 iş günü içinde</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row" style="margin-bottom:16px">
+      <label>Ödeme Notları (Salona gösterilecek ek bilgi)</label>
+      <textarea class="inp" id="wa-payment-note" rows="2" style="resize:vertical"
+        placeholder="Hafta içi 09:00–18:00 arası havale yapılması aktivasyonu hızlandırır."
+      >Hafta içi 09:00–18:00 arası havale yapılması aktivasyonu hızlandırır.</textarea>
+    </div>
+
+    <!-- Paket Fiyatları -->
+    <div style="font-size:.72rem;font-weight:700;color:var(--tx2);text-transform:uppercase;
+                letter-spacing:.5px;margin-bottom:10px">Kredi Paketi Fiyatları</div>
+    <table class="tbl" style="margin-bottom:14px">
+      <thead>
+        <tr>
+          <th>Paket (Mesaj)</th>
+          <th>Satış Fiyatı (₺)</th>
+          <th>Maliyet/msg (₺)</th>
+          <th>Kâr Marjı</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>100</strong> mesaj</td>
+          <td><input class="inp" id="wa-price-100" value="149" type="number" style="width:80px;padding:4px 8px"></td>
+          <td><input class="inp" id="wa-cost-100" value="1.20" type="number" step="0.01" style="width:70px;padding:4px 8px"></td>
+          <td id="wa-margin-100" style="font-weight:700;color:var(--green)">—</td>
+        </tr>
+        <tr>
+          <td><strong>200</strong> mesaj</td>
+          <td><input class="inp" id="wa-price-200" value="289" type="number" style="width:80px;padding:4px 8px"></td>
+          <td><input class="inp" id="wa-cost-200" value="1.15" type="number" step="0.01" style="width:70px;padding:4px 8px"></td>
+          <td id="wa-margin-200" style="font-weight:700;color:var(--green)">—</td>
+        </tr>
+        <tr>
+          <td><strong>500</strong> mesaj</td>
+          <td><input class="inp" id="wa-price-500" value="689" type="number" style="width:80px;padding:4px 8px"></td>
+          <td><input class="inp" id="wa-cost-500" value="1.10" type="number" step="0.01" style="width:70px;padding:4px 8px"></td>
+          <td id="wa-margin-500" style="font-weight:700;color:var(--green)">—</td>
+        </tr>
+        <tr>
+          <td><strong>1.000</strong> mesaj</td>
+          <td><input class="inp" id="wa-price-1000" value="1299" type="number" style="width:80px;padding:4px 8px"></td>
+          <td><input class="inp" id="wa-cost-1000" value="1.05" type="number" step="0.01" style="width:70px;padding:4px 8px"></td>
+          <td id="wa-margin-1000" style="font-weight:700;color:var(--green)">—</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Önizleme -->
+    <div style="margin-bottom:14px">
+      <button onclick="toggleWaPreview()" class="btn btn-sm"
+              style="background:var(--surface3);border:1px solid var(--border2);color:var(--tx2)">
+        👁 Salon Panelindeki Görünümü Önizle
+      </button>
+      <div id="wa-preview-box" style="display:none;margin-top:12px;background:var(--surface3);
+           border:1px solid var(--border2);border-radius:12px;padding:16px;font-size:.78rem;color:var(--tx2)">
+        <div style="font-weight:700;color:var(--tx);margin-bottom:8px">🏦 Banka Bilgileri (Önizleme)</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--tx3)">Banka</span><span id="prev-bank">—</span></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--tx3)">Hesap Sahibi</span><span id="prev-holder">—</span></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--tx3)">IBAN</span><span id="prev-iban" style="font-family:monospace">—</span></div>
+          <div style="display:flex;justify-content:space-between;background:rgba(201,168,76,.08);padding:6px 8px;border-radius:6px">
+            <span style="color:var(--tx3)">Referans (örnek)</span>
+            <span style="color:#C9A84C;font-weight:700">WA-RD-00142-200</span>
+          </div>
+          <div id="prev-note" style="color:var(--tx3);font-style:italic;margin-top:4px"></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px">
+      <button onclick="saveWaPaymentSettings()" class="btn btn-gold btn-sm">💾 Kaydet & Yayınla</button>
+      <button onclick="calcWaMargins()" class="btn btn-sm"
+              style="background:var(--surface3);border:1px solid var(--border2);color:var(--tx2)">
+        📊 Kâr Marjlarını Hesapla
+      </button>
+    </div>
+  </div>
+
+  <!-- SMS Ödeme Bilgileri -->
+  <div class="card">
+    <div class="card-title">📱 SMS Kredi Ödeme Ayarları
+      <span class="card-title-badge">Havale/EFT · Salon panelinde gösterilir</span>
+    </div>
+
+    <div style="background:rgba(79,168,255,.06);border:1px solid rgba(79,168,255,.18);
+                border-radius:10px;padding:12px 14px;margin-bottom:16px;font-size:.78rem;color:var(--tx2)">
+      💡 Bu bilgiler, salon sahipleri SMS Kredi paketi satın almak istediğinde ödeme modalında gösterilir.
+      Referans numarası otomatik olarak <strong>SMS-[SalonID]-[PaketAdet]</strong> formatında oluşturulur.
+      <br><span style="color:var(--tx3);margin-top:4px;display:block">📌 WA ve SMS için aynı banka hesabını kullanabilirsiniz — farklı referans ön eki ile ayrışır.</span>
+    </div>
+
+    <div class="form-2col">
+      <div class="form-row">
+        <label>Banka Adı</label>
+        <input class="inp" id="sms-bank-name" placeholder="Ziraat Bankası" value="Ziraat Bankası">
+      </div>
+      <div class="form-row">
+        <label>Hesap Sahibi (Şirket Adı)</label>
+        <input class="inp" id="sms-account-holder" placeholder="Randevu Deluxe Ltd. Şti." value="Randevu Deluxe Ltd. Şti.">
+      </div>
+    </div>
+
+    <div class="form-row" style="margin-bottom:12px">
+      <label>IBAN</label>
+      <div style="display:flex;gap:8px">
+        <input class="inp" id="sms-iban" placeholder="TR00 0001 0002 0003 0004 0005 00"
+               value="TR00 0001 0002 0003 0004 0005 00" style="flex:1;font-family:monospace;letter-spacing:.5px">
+        <button onclick="validateSmsIban()" class="btn btn-accent btn-sm" style="white-space:nowrap">✓ Doğrula</button>
+      </div>
+      <div style="font-size:.68rem;color:var(--tx3);margin-top:4px">TR ile başlayan 26 karakter IBAN numarası</div>
+    </div>
+
+    <div class="form-2col">
+      <div class="form-row">
+        <label>WhatsApp Destek Numarası <span style="color:var(--tx3);font-weight:400">(90 ile başlayın)</span></label>
+        <input class="inp" id="sms-phone" placeholder="905321234567" value="905321234567"
+               style="font-family:monospace">
+      </div>
+      <div class="form-row">
+        <label>Aktivasyon Süresi</label>
+        <select class="inp" id="sms-activation-time">
+          <option value="1">En geç 1 saat içinde</option>
+          <option value="4">En geç 4 saat içinde</option>
+          <option value="24" selected>En geç 24 saat içinde</option>
+          <option value="48">En geç 2 iş günü içinde</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row" style="margin-bottom:16px">
+      <label>Ödeme Notları (Salona gösterilecek ek bilgi)</label>
+      <textarea class="inp" id="sms-payment-note" rows="2" style="resize:vertical"
+        placeholder="Hafta içi 09:00–18:00 arası havale yapılması aktivasyonu hızlandırır."
+      >Hafta içi 09:00–18:00 arası havale yapılması aktivasyonu hızlandırır.</textarea>
+    </div>
+
+    <!-- Paket Fiyatları -->
+    <div style="font-size:.72rem;font-weight:700;color:var(--tx2);text-transform:uppercase;
+                letter-spacing:.5px;margin-bottom:10px">SMS Kredi Paketi Fiyatları</div>
+    <table class="tbl" style="margin-bottom:14px">
+      <thead>
+        <tr>
+          <th>Paket (SMS)</th>
+          <th>Satış Fiyatı (₺)</th>
+          <th>Maliyet/SMS (₺)</th>
+          <th>Kâr Marjı</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>100</strong> SMS</td>
+          <td><input class="inp" id="sms-price-100" value="79" type="number" style="width:80px;padding:4px 8px"></td>
+          <td><input class="inp" id="sms-cost-100" value="0.06" type="number" step="0.01" style="width:70px;padding:4px 8px"></td>
+          <td id="sms-margin-100" style="font-weight:700;color:var(--green)">—</td>
+        </tr>
+        <tr>
+          <td><strong>200</strong> SMS</td>
+          <td><input class="inp" id="sms-price-200" value="149" type="number" style="width:80px;padding:4px 8px"></td>
+          <td><input class="inp" id="sms-cost-200" value="0.055" type="number" step="0.01" style="width:70px;padding:4px 8px"></td>
+          <td id="sms-margin-200" style="font-weight:700;color:var(--green)">—</td>
+        </tr>
+        <tr>
+          <td><strong>500</strong> SMS</td>
+          <td><input class="inp" id="sms-price-500" value="349" type="number" style="width:80px;padding:4px 8px"></td>
+          <td><input class="inp" id="sms-cost-500" value="0.05" type="number" step="0.01" style="width:70px;padding:4px 8px"></td>
+          <td id="sms-margin-500" style="font-weight:700;color:var(--green)">—</td>
+        </tr>
+        <tr>
+          <td><strong>1.000</strong> SMS</td>
+          <td><input class="inp" id="sms-price-1000" value="649" type="number" style="width:80px;padding:4px 8px"></td>
+          <td><input class="inp" id="sms-cost-1000" value="0.045" type="number" step="0.01" style="width:70px;padding:4px 8px"></td>
+          <td id="sms-margin-1000" style="font-weight:700;color:var(--green)">—</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="display:flex;gap:10px">
+      <button onclick="saveSmsPaymentSettings()" class="btn btn-gold btn-sm">💾 Kaydet & Yayınla</button>
+      <button onclick="calcSmsMargins()" class="btn btn-sm"
+              style="background:var(--surface3);border:1px solid var(--border2);color:var(--tx2)">
+        📊 Kâr Marjlarını Hesapla
+      </button>
+    </div>
+  </div>
+
+  <!-- Özellik Bayrakları -->
+  <div class="card">
+    <div class="card-title">🚩 Özellik Bayrakları (Feature Flags)</div>
+    <div id="feature-flags">
+      <div class="toggle-row">
+        <div><div class="toggle-label">Online Randevu (Booking Page)</div><div class="toggle-desc">Tüm salonlar için online booking aktif</div></div>
+        <label class="toggle-sw"><input type="checkbox" checked id="ff-booking"><span class="toggle-sw-slider"></span></label>
+      </div>
+      <div class="toggle-row">
+        <div><div class="toggle-label">WhatsApp Hatırlatma</div><div class="toggle-desc">wa.me deep-link sistemi</div></div>
+        <label class="toggle-sw"><input type="checkbox" checked id="ff-wa"><span class="toggle-sw-slider"></span></label>
+      </div>
+      <div class="toggle-row">
+        <div><div class="toggle-label">Kampanya & İndirim Kodları</div><div class="toggle-desc">Pro ve Lüks paket için aktif</div></div>
+        <label class="toggle-sw"><input type="checkbox" checked id="ff-kampanya"><span class="toggle-sw-slider"></span></label>
+      </div>
+      <div class="toggle-row">
+        <div><div class="toggle-label">Stok Yönetimi</div><div class="toggle-desc">Envanter modülü</div></div>
+        <label class="toggle-sw"><input type="checkbox" checked id="ff-stok"><span class="toggle-sw-slider"></span></label>
+      </div>
+      <div class="toggle-row">
+        <div><div class="toggle-label">Bakım Modu</div><div class="toggle-desc">Tüm kullanıcılara bakım sayfası göster</div></div>
+        <label class="toggle-sw"><input type="checkbox" id="ff-maintenance"><span class="toggle-sw-slider"></span></label>
+      </div>
+      <div class="toggle-row">
+        <div><div class="toggle-label">Yeni Kayıt Kabulü</div><div class="toggle-desc">Yeni salon kayıtlarına izin ver</div></div>
+        <label class="toggle-sw"><input type="checkbox" checked id="ff-signup"><span class="toggle-sw-slider"></span></label>
+      </div>
+    </div>
+  </div>
+
+  <!-- E-posta Ayarları -->
+  <div class="card">
+    <div class="card-title">📧 E-posta / SMTP Ayarları</div>
+    <div class="form-2col">
+      <div class="form-row"><label>SMTP Host</label><input class="inp" id="cfg-smtp-host" value="smtp.sendgrid.net"></div>
+      <div class="form-row"><label>SMTP Port</label><input class="inp" id="cfg-smtp-port" value="587"></div>
+      <div class="form-row"><label>Gönderici Adı</label><input class="inp" id="cfg-smtp-name" value="Randevu Deluxe"></div>
+      <div class="form-row"><label>Gönderici E-posta</label><input class="inp" id="cfg-smtp-from" value="noreply@randevudeluxe.com"></div>
+    </div>
+    <button class="btn btn-accent btn-sm" onclick="testEmail()">📨 Test E-postası Gönder</button>
+  </div>
+
+  <!-- Tehlikeli Bölge -->
+  <div class="card" style="border-color:rgba(239,68,68,.25)">
+    <div class="card-title" style="color:var(--danger)">⚠️ Tehlikeli Bölge</div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px">
+      <button class="btn btn-danger btn-sm" onclick="confirmDangerAction('cache')">🔄 Cache Temizle</button>
+      <button class="btn btn-danger btn-sm" onclick="confirmDangerAction('logs')">🗑️ Logları Temizle</button>
+      <button class="btn btn-danger btn-sm" onclick="confirmDangerAction('db')">💾 DB Backup Al</button>
+    </div>
+  </div>
+</div>
+
+</main><!-- /main -->
+
+<!-- ══ SALON DETAIL MODAL ══ -->
+<div class="modal-overlay" id="salon-modal" onclick="handleModalClick(event,'salon-modal')">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-hdr">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="salon-av" id="sm-av" style="width:40px;height:40px;border-radius:10px">AB</div>
+        <div>
+          <div class="modal-title" id="sm-name">Salon Adı</div>
+          <div style="font-size:.72rem;color:var(--tx2);margin-top:2px" id="sm-city"></div>
+        </div>
+      </div>
+      <button class="modal-close" onclick="closeModal('salon-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px" id="sm-chips"></div>
+
+      <!-- Plan & Abonelik -->
+      <div class="card" style="margin-bottom:10px">
+        <div class="card-title">💎 Plan & Abonelik <span class="card-title-badge">Yıllık Faturalandırma</span></div>
+        <div class="form-row" style="margin-bottom:10px">
+          <label>Plan</label>
+          <select class="inp inp-select" id="sm-plan-sel">
+            <option value="free">🆓 Ücretsiz (Sonsuza dek)</option>
+            <option value="std">⭐ Standart — ₺1.990/yıl (~₺166/ay)</option>
+            <option value="pro">🚀 Pro — ₺3.990/yıl (~₺332/ay)</option>
+            <option value="lux">💎 Lüks — ₺7.990/yıl (~₺666/ay)</option>
+          </select>
+        </div>
+        <button class="btn btn-accent btn-sm" onclick="saveSalonPlan()">💾 Planı Kaydet</button>
+      </div>
+
+      <!-- Abonelik Süresi -->
+      <div class="card" style="margin-bottom:10px">
+        <div class="card-title">📅 Abonelik Süresi & Yenileme</div>
+        <div id="sm-expiry-section"></div>
+      </div>
+
+      <!-- WA Kullanımı (aylık) -->
+      <div class="card" style="margin-bottom:10px">
+        <div class="card-title">💬 WhatsApp Kullanımı <span class="card-title-badge">Aylık Limit</span></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+          <span id="sm-wa-lbl" style="font-size:.82rem;color:var(--tx2)">—</span>
+          <span id="sm-wa-pct" style="font-size:.82rem;font-weight:700"></span>
+        </div>
+        <div class="progress-track"><div class="progress-fill" id="sm-wa-fill" style="width:0%"></div></div>
+        <button class="btn btn-ghost btn-sm" style="margin-top:8px" onclick="resetWaLimit()">🔄 Aylık Limiti Sıfırla</button>
+      </div>
+
+      <!-- Salon Bilgileri -->
+      <div class="card" style="margin-bottom:10px">
+        <div class="card-title">📋 Salon Bilgileri</div>
+        <div class="form-2col">
+          <div class="form-row"><label>Salon Adı</label><input class="inp" id="sm-edit-name"></div>
+          <div class="form-row"><label>Şehir</label><input class="inp" id="sm-edit-city"></div>
+          <div class="form-row"><label>E-posta</label><input class="inp" id="sm-edit-email" type="email"></div>
+          <div class="form-row"><label>Telefon</label><input class="inp" id="sm-edit-phone" type="tel"></div>
+        </div>
+        <button class="btn btn-accent btn-sm" onclick="saveSalonInfo()">💾 Bilgileri Kaydet</button>
+      </div>
+
+      <!-- Son Randevular -->
+      <div class="card" style="margin-bottom:10px">
+        <div class="card-title">🗓️ Son Aktivite</div>
+        <div id="sm-activity" style="font-size:.82rem;color:var(--tx2)"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <a href="dashboard.html" target="_blank" class="btn btn-accent btn-sm">🔗 Dashboard'u Aç</a>
+      <button class="btn btn-ghost btn-sm" onclick="sendUpsellModal()">📤 Upsell Gönder</button>
+      <button class="btn btn-danger btn-sm" style="margin-left:auto" onclick="toggleSalonStatus()">⏸ Askıya Al</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ BRANCH MODAL ══ -->
+<div class="modal-overlay" id="branch-modal" onclick="handleModalClick(event,'branch-modal')">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-hdr">
+      <div class="modal-title" id="bm-title">Yeni Branche Ekle</div>
+      <button class="modal-close" onclick="closeModal('branch-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-2col">
+        <div class="form-row">
+          <label>Branche Adı *</label>
+          <input class="inp" id="bm-name" placeholder="Kuaför / Frisör">
+        </div>
+        <div class="form-row">
+          <label>Emoji İkon</label>
+          <input class="inp" id="bm-icon" placeholder="✂️" style="font-size:1.4rem;text-align:center">
+        </div>
+      </div>
+      <div class="form-row">
+        <label>Açıklama</label>
+        <input class="inp" id="bm-desc" placeholder="Saç kesimi, boyama, şekillendirme hizmetleri">
+      </div>
+      <div class="form-row">
+        <label>Renk (kart bordürü)</label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input type="color" id="bm-color" value="#00C8FF" style="width:44px;height:36px;border:none;background:none;cursor:pointer;border-radius:8px">
+          <span id="bm-color-presets" style="display:flex;gap:6px">
+            <span onclick="document.getElementById('bm-color').value='#00C8FF'" style="width:22px;height:22px;border-radius:50%;background:#00C8FF;cursor:pointer;border:2px solid var(--br2)"></span>
+            <span onclick="document.getElementById('bm-color').value='#C9A84C'" style="width:22px;height:22px;border-radius:50%;background:#C9A84C;cursor:pointer;border:2px solid var(--br2)"></span>
+            <span onclick="document.getElementById('bm-color').value='#F472B6'" style="width:22px;height:22px;border-radius:50%;background:#F472B6;cursor:pointer;border:2px solid var(--br2)"></span>
+            <span onclick="document.getElementById('bm-color').value='#EC4899'" style="width:22px;height:22px;border-radius:50%;background:#EC4899;cursor:pointer;border:2px solid var(--br2)"></span>
+            <span onclick="document.getElementById('bm-color').value='#8B5CF6'" style="width:22px;height:22px;border-radius:50%;background:#8B5CF6;cursor:pointer;border:2px solid var(--br2)"></span>
+            <span onclick="document.getElementById('bm-color').value='#22C55E'" style="width:22px;height:22px;border-radius:50%;background:#22C55E;cursor:pointer;border:2px solid var(--br2)"></span>
+            <span onclick="document.getElementById('bm-color').value='#F59E0B'" style="width:22px;height:22px;border-radius:50%;background:#F59E0B;cursor:pointer;border:2px solid var(--br2)"></span>
+          </span>
+        </div>
+      </div>
+      <div class="toggle-row" style="margin-top:4px">
+        <div><div class="toggle-label">Aktif</div><div class="toggle-desc">Pasifse onboarding'de görünmez</div></div>
+        <label class="toggle-sw"><input type="checkbox" checked id="bm-active"><span class="toggle-sw-slider"></span></label>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('branch-modal')">İptal</button>
+      <button class="btn btn-gold btn-sm btn-full" onclick="saveBranch()">💾 Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ HİZMET ŞABLON MODAL ══ -->
+<div class="modal-overlay" id="hizmet-modal" onclick="handleModalClick(event,'hizmet-modal')">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-hdr">
+      <div>
+        <div class="modal-title" id="hm-title">Şablon Ekle</div>
+        <div style="font-size:.72rem;color:var(--accent);margin-top:3px" id="hm-branch-lbl"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal('hizmet-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="alert info" style="margin-bottom:12px;padding:8px 12px">
+        <div class="alert-icon" style="font-size:.9rem">💡</div>
+        <div class="alert-text" style="font-size:.76rem">Şablonlar salon sahibine <strong>öneri</strong> olarak sunulur. Fiyat ve içeriği kendisi düzenler.</div>
+      </div>
+      <div class="form-row">
+        <label>Hizmet Adı *</label>
+        <input class="inp" id="hm-name" placeholder="örn. Saç Kesimi">
+      </div>
+      <div class="form-2col">
+        <div class="form-row">
+          <label>Önerilen Süre (dk)</label>
+          <input class="inp" type="number" id="hm-dur" placeholder="30" min="5" step="5">
+        </div>
+        <div class="form-row">
+          <label>Öneri Fiyat (₺)</label>
+          <input class="inp" type="number" id="hm-price" placeholder="150" min="0">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('hizmet-modal')">İptal</button>
+      <button class="btn btn-gold btn-sm btn-full" onclick="saveHizmet()">💾 Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TOAST ══ -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ── Theme System ── */
+(function(){
+  var saved = localStorage.getItem('rd-theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', saved);
+  _updateAdminThemeBtn(saved);
+})();
+function toggleAdminTheme(){
+  var cur  = document.documentElement.getAttribute('data-theme') || 'dark';
+  var next = cur === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('rd-theme', next);
+  _updateAdminThemeBtn(next);
+}
+function _updateAdminThemeBtn(theme){
+  var icon = document.getElementById('admin-theme-icon');
+  var lbl  = document.getElementById('admin-theme-lbl');
+  if(!icon || !lbl) return;
+  if(theme === 'light'){
+    icon.textContent = '🌙'; lbl.textContent = 'Dark';
+  } else {
+    icon.textContent = '☀️'; lbl.textContent = 'Light';
+  }
+}
+
+/* ── WA Ödeme Ayarları ── */
+const WA_PAYMENT_CFG_KEY = 'rd_wa_payment_cfg';
+
+function loadWaPaymentSettings() {
+  const saved = localStorage.getItem(WA_PAYMENT_CFG_KEY);
+  if (!saved) { calcWaMargins(); return; }
+  const cfg = JSON.parse(saved);
+  const set = (id, val) => { const el = document.getElementById(id); if(el) el.value = val || ''; };
+  set('wa-bank-name',       cfg.bankName);
+  set('wa-account-holder',  cfg.accountHolder);
+  set('wa-iban',            cfg.iban);
+  set('wa-phone',           cfg.phone);
+  set('wa-payment-note',    cfg.note);
+  if (cfg.activationTime) {
+    const sel = document.getElementById('wa-activation-time');
+    if (sel) sel.value = cfg.activationTime;
+  }
+  set('wa-price-100',  cfg.prices?.[100]);
+  set('wa-price-200',  cfg.prices?.[200]);
+  set('wa-price-500',  cfg.prices?.[500]);
+  set('wa-price-1000', cfg.prices?.[1000]);
+  set('wa-cost-100',   cfg.costs?.[100]);
+  set('wa-cost-200',   cfg.costs?.[200]);
+  set('wa-cost-500',   cfg.costs?.[500]);
+  set('wa-cost-1000',  cfg.costs?.[1000]);
+  calcWaMargins();
+}
+
+function saveWaPaymentSettings() {
+  const g = id => document.getElementById(id)?.value?.trim() || '';
+  const cfg = {
+    bankName:       g('wa-bank-name'),
+    accountHolder:  g('wa-account-holder'),
+    iban:           g('wa-iban'),
+    phone:          g('wa-phone'),
+    note:           g('wa-payment-note'),
+    activationTime: g('wa-activation-time'),
+    prices: { 100: +g('wa-price-100'), 200: +g('wa-price-200'), 500: +g('wa-price-500'), 1000: +g('wa-price-1000') },
+    costs:  { 100: +g('wa-cost-100'),  200: +g('wa-cost-200'),  500: +g('wa-cost-500'),  1000: +g('wa-cost-1000')  },
+  };
+  localStorage.setItem(WA_PAYMENT_CFG_KEY, JSON.stringify(cfg));
+  showAdminMsg('✅ WA ödeme ayarları kaydedildi ve yayınlandı!', 'green');
+  calcWaMargins();
+}
+
+function calcWaMargins() {
+  [100, 200, 500, 1000].forEach(pkg => {
+    const price  = parseFloat(document.getElementById(`wa-price-${pkg}`)?.value) || 0;
+    const cost   = parseFloat(document.getElementById(`wa-cost-${pkg}`)?.value)  || 0;
+    const total  = cost * pkg;
+    const margin = price > 0 ? Math.round((price - total) / price * 100) : 0;
+    const el     = document.getElementById(`wa-margin-${pkg}`);
+    if (el) {
+      el.textContent = `%${margin}`;
+      el.style.color = margin >= 15 ? 'var(--green)' : margin >= 10 ? 'var(--orange)' : 'var(--red)';
+    }
+  });
+}
+
+function validateIban() {
+  const iban = document.getElementById('wa-iban')?.value?.replace(/\s/g,'') || '';
+  if (iban.length === 26 && iban.startsWith('TR')) {
+    showAdminMsg('✅ IBAN formatı geçerli', 'green');
+  } else {
+    showAdminMsg('⚠️ IBAN geçersiz — TR ile başlayan 26 karakter olmalı', 'red');
+  }
+}
+
+function toggleWaPreview() {
+  const box = document.getElementById('wa-preview-box');
+  if (!box) return;
+  const isOpen = box.style.display !== 'none';
+  if (isOpen) { box.style.display = 'none'; return; }
+  document.getElementById('prev-bank').textContent   = document.getElementById('wa-bank-name')?.value || '—';
+  document.getElementById('prev-holder').textContent = document.getElementById('wa-account-holder')?.value || '—';
+  document.getElementById('prev-iban').textContent   = document.getElementById('wa-iban')?.value || '—';
+  document.getElementById('prev-note').textContent   = document.getElementById('wa-payment-note')?.value || '';
+  box.style.display = 'block';
+}
+
+function showAdminMsg(msg, type) {
+  const el = document.getElementById('admin-toast');
+  if (!el) return;
+  el.textContent = msg;
+  el.style.background = type === 'green' ? '#15803D' : type === 'red' ? '#DC2626' : '#9A6D1A';
+  el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', 3000);
+}
+
+// ── SMS Ayarları ──────────────────────────────
+function loadSmsPaymentSettings() {
+  try {
+    const cfg = JSON.parse(localStorage.getItem('rd_sms_payment_cfg') || '{}');
+    const set = (id, val) => { const el = document.getElementById(id); if (el && val !== undefined) el.value = val; };
+    set('sms-bank-name',       cfg.bankName);
+    set('sms-account-holder',  cfg.accountHolder);
+    set('sms-iban',            cfg.iban);
+    set('sms-phone',           cfg.waPhone);
+    set('sms-activation-time', cfg.activationTime);
+    set('sms-payment-note',    cfg.note);
+    set('sms-price-100',  cfg.prices?.[100]);
+    set('sms-price-200',  cfg.prices?.[200]);
+    set('sms-price-500',  cfg.prices?.[500]);
+    set('sms-price-1000', cfg.prices?.[1000]);
+    calcSmsMargins();
+  } catch(e) {}
+}
+
+function saveSmsPaymentSettings() {
+  const g = id => document.getElementById(id)?.value?.trim() || '';
+  const cfg = {
+    bankName:       g('sms-bank-name'),
+    accountHolder:  g('sms-account-holder'),
+    iban:           g('sms-iban'),
+    waPhone:        g('sms-phone'),
+    activationTime: g('sms-activation-time'),
+    note:           g('sms-payment-note'),
+    prices: { 100: +g('sms-price-100'), 200: +g('sms-price-200'), 500: +g('sms-price-500'), 1000: +g('sms-price-1000') },
+  };
+  localStorage.setItem('rd_sms_payment_cfg', JSON.stringify(cfg));
+  showAdminMsg('✅ SMS ödeme ayarları kaydedildi!', 'green');
+}
+
+function calcSmsMargins() {
+  [100, 200, 500, 1000].forEach(pkg => {
+    const price  = parseFloat(document.getElementById(`sms-price-${pkg}`)?.value) || 0;
+    const cost   = parseFloat(document.getElementById(`sms-cost-${pkg}`)?.value)  || 0;
+    const totalCost = cost * pkg;
+    const margin = price > 0 ? ((price - totalCost) / price * 100).toFixed(1) : '—';
+    const el = document.getElementById(`sms-margin-${pkg}`);
+    if (el) {
+      el.textContent = price > 0 ? `%${margin} · ₺${(price - totalCost).toFixed(0)} kâr` : '—';
+      el.style.color = parseFloat(margin) >= 20 ? 'var(--green)' : parseFloat(margin) > 0 ? '#FFB830' : 'var(--red)';
+    }
+  });
+}
+
+function validateSmsIban() {
+  const iban = document.getElementById('sms-iban')?.value?.replace(/\s/g,'') || '';
+  if (iban.length === 26 && iban.startsWith('TR')) {
+    showAdminMsg('✅ IBAN formatı geçerli', 'green');
+  } else {
+    showAdminMsg('⚠️ IBAN geçersiz — TR ile başlayan 26 karakter olmalı', 'red');
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadWaPaymentSettings();
+  loadSmsPaymentSettings();
+  // Input-Änderungen → Margen live berechnen
+  [100,200,500,1000].forEach(pkg => {
+    ['price','cost'].forEach(type => {
+      const waEl = document.getElementById(`wa-${type}-${pkg}`);
+      if (waEl) waEl.addEventListener('input', calcWaMargins);
+      const smsEl = document.getElementById(`sms-${type}-${pkg}`);
+      if (smsEl) smsEl.addEventListener('input', calcSmsMargins);
+    });
+  });
+});
+</script>
+<script src="js/admin.js"></script>
+
+<!-- Admin Toast -->
+<div id="admin-toast" style="display:none;position:fixed;bottom:24px;right:24px;z-index:9999;
+  padding:12px 20px;border-radius:10px;color:#fff;font-size:.82rem;font-weight:700;
+  box-shadow:0 4px 16px rgba(0,0,0,.3)"></div>
+
+</body>
+</html>

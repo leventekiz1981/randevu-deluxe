@@ -1,0 +1,1212 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="shortcut icon" href="favicon.svg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0D0D12">
+  <title>Randevu Deluxe — Salon Kurulumu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+
+  <style>
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       DESIGN TOKENS
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    :root,[data-theme="dark"] {
+      --bg:        #0D0D12;
+      --card-bg:   #131318;
+      --card-bg2:  #1A1A22;
+      --gold:      #C9A84C;
+      --gold-dim:  rgba(201,168,76,0.15);
+      --gold-glow: rgba(201,168,76,0.25);
+      --cream:     #EDE8DC;
+      --tx1:       #EDE8DC;
+      --tx2:       #9A9AA8;
+      --tx3:       #5A5A6A;
+      --border:    rgba(255,255,255,0.08);
+      --border-hi: rgba(255,255,255,0.14);
+      --danger:    #E05252;
+      --success:   #52C27A;
+      --radius-card: 16px;
+      --radius-sm:   10px;
+      --shadow-card: 0 2px 20px rgba(0,0,0,0.4);
+    }
+    [data-theme="light"]{
+      --bg:#FFFFFF; --card-bg:#FAFAFA; --card-bg2:#F0F0F2;
+      --gold:#9A6D1A; --gold-dim:rgba(154,109,26,0.12); --gold-glow:rgba(154,109,26,0.18);
+      --cream:#111111; --tx1:#111111; --tx2:#52525B; --tx3:#9CA3AF;
+      --border:rgba(0,0,0,0.09); --border-hi:rgba(0,0,0,0.16);
+      --danger:#DC2626; --success:#16A34A;
+      --shadow-card:0 2px 16px rgba(0,0,0,0.08);
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       RESET & BASE
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    *, *::before, *::after {
+      margin: 0; padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+    html {
+      font-size: 16px;
+      -webkit-text-size-adjust: 100%;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--tx1);
+      min-height: 100vh;
+      min-height: 100dvh;
+      line-height: 1.5;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: background .3s, color .3s;
+    }
+    input, button, select { font-family: inherit; }
+    button { cursor: pointer; border: none; background: none; }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       LAYOUT
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .page-wrap {
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 0 20px 40px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       TOP PROGRESS BAR
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .top-bar {
+      padding: 20px 20px 0;
+      max-width: 480px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    .progress-track {
+      height: 4px;
+      background: var(--border);
+      border-radius: 99px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold), #E8C96A);
+      border-radius: 99px;
+      transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      width: 20%;
+    }
+    .progress-label {
+      font-size: 0.72rem;
+      color: var(--tx3);
+      font-weight: 500;
+      text-align: right;
+    }
+    .progress-label span {
+      color: var(--gold);
+      font-weight: 700;
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       STEP TRANSITIONS
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .steps-container {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+    .step {
+      display: none;
+      animation-duration: 0.35s;
+      animation-fill-mode: both;
+      animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .step.active { display: flex; flex-direction: column; }
+    .step.enter-right { animation-name: enterRight; }
+    .step.enter-left  { animation-name: enterLeft; }
+
+    @keyframes enterRight {
+      from { transform: translateX(50px); opacity: 0; }
+      to   { transform: translateX(0);    opacity: 1; }
+    }
+    @keyframes enterLeft {
+      from { transform: translateX(-50px); opacity: 0; }
+      to   { transform: translateX(0);     opacity: 1; }
+    }
+    @keyframes fadeUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       STEP 1: WELCOME
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .welcome-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding-top: 40px;
+      flex: 1;
+    }
+    .logo-wordmark {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.9rem;
+      font-weight: 900;
+      color: var(--gold);
+      letter-spacing: -0.5px;
+      margin-bottom: 6px;
+      animation: fadeUp 0.5s ease both;
+    }
+    .logo-tagline {
+      font-size: 0.75rem;
+      color: var(--tx3);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      font-weight: 500;
+      margin-bottom: 48px;
+      animation: fadeUp 0.5s 0.08s ease both;
+    }
+    .welcome-illustration {
+      font-size: 5.5rem;
+      margin-bottom: 36px;
+      animation: fadeUp 0.5s 0.14s ease both;
+      filter: drop-shadow(0 0 32px rgba(201,168,76,0.2));
+    }
+    .welcome-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.55rem;
+      font-weight: 700;
+      color: var(--cream);
+      margin-bottom: 14px;
+      animation: fadeUp 0.5s 0.2s ease both;
+      line-height: 1.3;
+    }
+    .welcome-subtitle {
+      font-size: 0.88rem;
+      color: var(--tx2);
+      line-height: 1.7;
+      margin-bottom: 48px;
+      max-width: 320px;
+      animation: fadeUp 0.5s 0.25s ease both;
+    }
+    .welcome-features {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
+      margin-bottom: 40px;
+      animation: fadeUp 0.5s 0.3s ease both;
+    }
+    .welcome-feature {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 11px 14px;
+      text-align: left;
+    }
+    .welcome-feature-icon {
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+    .welcome-feature-text {
+      font-size: 0.82rem;
+      color: var(--tx2);
+    }
+    .welcome-feature-text strong {
+      color: var(--tx1);
+      font-weight: 600;
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       STEP HEADER (steps 2-5)
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .step-header {
+      padding-top: 32px;
+      margin-bottom: 28px;
+    }
+    .step-eyebrow {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--gold);
+      margin-bottom: 8px;
+    }
+    .step-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.45rem;
+      font-weight: 700;
+      color: var(--cream);
+      margin-bottom: 6px;
+      line-height: 1.25;
+    }
+    .step-subtitle {
+      font-size: 0.82rem;
+      color: var(--tx2);
+      line-height: 1.6;
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       FORM ELEMENTS
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-label {
+      display: block;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--tx2);
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      margin-bottom: 7px;
+    }
+    .form-input {
+      width: 100%;
+      background: var(--card-bg);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 13px 15px;
+      font-size: 0.92rem;
+      color: var(--tx1);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      outline: none;
+      -webkit-appearance: none;
+    }
+    .form-input::placeholder { color: var(--tx3); }
+    .form-input:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(201,168,76,0.12);
+    }
+    .form-input.error {
+      border-color: var(--danger);
+      box-shadow: 0 0 0 3px rgba(224,82,82,0.12);
+    }
+    .form-error-msg {
+      font-size: 0.72rem;
+      color: var(--danger);
+      margin-top: 5px;
+      display: none;
+    }
+    .form-error-msg.visible { display: block; }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       STEP 3: STAFF COUNT STEPPER
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .stepper-wrap {
+      background: var(--card-bg);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+    .stepper-label {
+      font-size: 0.82rem;
+      color: var(--tx2);
+      margin-bottom: 14px;
+    }
+    .stepper-control {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      background: var(--card-bg2);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      width: fit-content;
+    }
+    .stepper-btn {
+      width: 46px;
+      height: 46px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      color: var(--tx2);
+      transition: all 0.15s ease;
+      flex-shrink: 0;
+    }
+    .stepper-btn:hover:not(:disabled) { background: var(--border); color: var(--tx1); }
+    .stepper-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    .stepper-value {
+      min-width: 56px;
+      text-align: center;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--gold);
+      font-variant-numeric: tabular-nums;
+      border-left: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      padding: 0 8px;
+      line-height: 46px;
+    }
+    .staff-inputs-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .staff-input-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .staff-input-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--gold-dim);
+      border: 1.5px solid rgba(201,168,76,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--gold);
+      flex-shrink: 0;
+    }
+    .staff-more-badge {
+      background: var(--card-bg);
+      border: 1px dashed var(--border-hi);
+      border-radius: var(--radius-sm);
+      padding: 11px 14px;
+      font-size: 0.8rem;
+      color: var(--tx3);
+      text-align: center;
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       STEP 4: SERVICES CHECKLIST
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .service-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .service-check-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--card-bg);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 13px 15px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+    .service-check-item:active { transform: scale(0.99); }
+    .service-check-item.checked {
+      border-color: rgba(201,168,76,0.4);
+      background: #17150D;
+    }
+    .service-check-box {
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      border: 2px solid var(--border-hi);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+      font-size: 0.72rem;
+      color: transparent;
+    }
+    .service-check-item.checked .service-check-box {
+      background: var(--gold);
+      border-color: var(--gold);
+      color: #080808;
+      font-weight: 700;
+    }
+    .service-check-icon {
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+    .service-check-name {
+      flex: 1;
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: var(--tx1);
+    }
+    .service-check-item.checked .service-check-name {
+      color: var(--cream);
+      font-weight: 600;
+    }
+    .selected-count-note {
+      font-size: 0.75rem;
+      color: var(--tx3);
+      text-align: center;
+      padding: 4px 0 12px;
+    }
+    .selected-count-note span { color: var(--gold); font-weight: 600; }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       STEP 5: DONE
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .done-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding-top: 32px;
+      flex: 1;
+    }
+    .done-checkmark-ring {
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      border: 3px solid var(--gold);
+      background: rgba(201,168,76,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 28px;
+      animation: checkPop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+      position: relative;
+    }
+    .done-checkmark-ring::after {
+      content: '';
+      position: absolute;
+      inset: -8px;
+      border-radius: 50%;
+      border: 1px solid rgba(201,168,76,0.2);
+      animation: ringExpand 1s ease-out 0.4s both;
+    }
+    @keyframes checkPop {
+      0%   { transform: scale(0) rotate(-20deg); opacity: 0; }
+      60%  { transform: scale(1.12) rotate(4deg); opacity: 1; }
+      100% { transform: scale(1) rotate(0); opacity: 1; }
+    }
+    @keyframes ringExpand {
+      from { transform: scale(0.8); opacity: 0; }
+      to   { transform: scale(1.15); opacity: 1; }
+    }
+    .done-checkmark-svg {
+      width: 44px;
+      height: 44px;
+    }
+    .done-checkmark-svg path {
+      stroke: var(--gold);
+      stroke-width: 3;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+      stroke-dasharray: 60;
+      stroke-dashoffset: 60;
+      animation: drawCheck 0.5s ease 0.3s forwards;
+    }
+    @keyframes drawCheck {
+      to { stroke-dashoffset: 0; }
+    }
+    .done-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--cream);
+      margin-bottom: 10px;
+      animation: fadeUp 0.4s 0.5s ease both;
+    }
+    .done-subtitle {
+      font-size: 0.85rem;
+      color: var(--tx2);
+      margin-bottom: 32px;
+      line-height: 1.7;
+      animation: fadeUp 0.4s 0.6s ease both;
+    }
+    .done-summary-card {
+      background: var(--card-bg);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: 18px;
+      width: 100%;
+      margin-bottom: 28px;
+      text-align: left;
+      animation: fadeUp 0.4s 0.65s ease both;
+    }
+    .done-summary-title {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--tx3);
+      margin-bottom: 14px;
+    }
+    .done-summary-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 0;
+    }
+    .done-summary-row + .done-summary-row {
+      border-top: 1px solid var(--border);
+    }
+    .done-summary-icon {
+      font-size: 1rem;
+      width: 22px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .done-summary-key {
+      font-size: 0.75rem;
+      color: var(--tx2);
+      flex: 1;
+    }
+    .done-summary-val {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--tx1);
+    }
+    .done-summary-val.gold { color: var(--gold); }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       NAVIGATION BUTTONS
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .nav-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: auto;
+      padding-top: 24px;
+      align-items: center;
+    }
+    .btn-back {
+      padding: 14px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--tx2);
+      background: transparent;
+      border: 1.5px solid var(--border);
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    .btn-back:hover { color: var(--tx1); border-color: var(--border-hi); }
+    .btn-next {
+      flex: 1;
+      padding: 15px 20px;
+      border-radius: var(--radius-sm);
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: #080808;
+      background: var(--gold);
+      border: none;
+      transition: all 0.2s ease;
+      letter-spacing: 0.2px;
+    }
+    .btn-next:hover {
+      background: #D9B85C;
+      box-shadow: 0 4px 18px rgba(201,168,76,0.35);
+    }
+    .btn-next:active { transform: scale(0.98); }
+    .btn-later {
+      display: block;
+      text-align: center;
+      font-size: 0.78rem;
+      color: var(--tx3);
+      text-decoration: none;
+      margin-top: 14px;
+      transition: color 0.2s ease;
+    }
+    .btn-later:hover { color: var(--tx2); }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       FOOTER
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .site-footer {
+      text-align: center;
+      font-size: 0.68rem;
+      color: var(--tx3);
+      padding: 20px;
+      border-top: 1px solid var(--border);
+      max-width: 480px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       STEP 2: BRANCHE SELECTION
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .branche-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .branche-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--card-bg);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+    .branche-card:active { transform: scale(0.99); }
+    .branche-card.selected {
+      border-color: var(--branche-color, var(--gold));
+      background: var(--card-bg2);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--branche-color, var(--gold)) 15%, transparent);
+    }
+    .branche-icon {
+      font-size: 1.6rem;
+      flex-shrink: 0;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--card-bg2);
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      transition: background .2s;
+    }
+    .branche-card.selected .branche-icon {
+      background: color-mix(in srgb, var(--branche-color, var(--gold)) 18%, transparent);
+      border-color: color-mix(in srgb, var(--branche-color, var(--gold)) 35%, transparent);
+    }
+    .branche-info { flex: 1; min-width: 0; }
+    .branche-name {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--tx1);
+      margin-bottom: 2px;
+    }
+    .branche-desc {
+      font-size: 0.74rem;
+      color: var(--tx3);
+      line-height: 1.4;
+    }
+    .branche-check {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 2px solid var(--border-hi);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all .2s;
+      font-size: 0.7rem;
+      color: transparent;
+    }
+    .branche-card.selected .branche-check {
+      background: var(--branche-color, var(--gold));
+      border-color: var(--branche-color, var(--gold));
+      color: #fff;
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       RESPONSIVE
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    @media (min-width: 480px) {
+      .logo-wordmark { font-size: 2.2rem; }
+      .welcome-illustration { font-size: 6.5rem; }
+    }
+  </style>
+</head>
+<body>
+<button id="ob-theme-btn" onclick="toggleObTheme()"
+  style="position:fixed;top:14px;right:14px;z-index:9999;
+         background:var(--card-bg);border:1px solid var(--border-hi);
+         border-radius:8px;padding:7px 11px;font-size:.85rem;
+         cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,.2);
+         transition:all .2s">☀️</button>
+
+<!-- ══════════════════════════════════
+     TOP PROGRESS BAR
+══════════════════════════════════ -->
+<div class="top-bar" id="progress-bar-wrap">
+  <div class="progress-track">
+    <div class="progress-fill" id="progress-fill"></div>
+  </div>
+  <div class="progress-label">Adım <span id="progress-text">1</span> / 6</div>
+</div>
+
+<!-- ══════════════════════════════════
+     MAIN
+══════════════════════════════════ -->
+<div class="page-wrap">
+  <div class="steps-container">
+
+    <!-- ─── STEP 1: WELCOME ─── -->
+    <div class="step active" id="step-1">
+      <div class="welcome-wrap">
+        <div class="logo-wordmark">Randevu Deluxe</div>
+        <div class="logo-tagline">Salon Yönetim Sistemi</div>
+        <div class="welcome-illustration">🏪</div>
+        <div class="welcome-title">Salonunuzu 6 adımda<br>hazır hale getirin</div>
+        <div class="welcome-subtitle">Birkaç dakika içinde salonunuzu kurun ve çevrimiçi randevu almaya başlayın.</div>
+        <div class="welcome-features">
+          <div class="welcome-feature">
+            <div class="welcome-feature-icon">✂️</div>
+            <div class="welcome-feature-text"><strong>Hizmetlerinizi</strong> tanımlayın</div>
+          </div>
+          <div class="welcome-feature">
+            <div class="welcome-feature-icon">👥</div>
+            <div class="welcome-feature-text"><strong>Çalışanlarınızı</strong> ekleyin</div>
+          </div>
+          <div class="welcome-feature">
+            <div class="welcome-feature-icon">📅</div>
+            <div class="welcome-feature-text"><strong>Çevrimiçi randevu</strong> almaya başlayın</div>
+          </div>
+        </div>
+      </div>
+      <div class="nav-actions" style="padding-top:0">
+        <button class="btn-next" onclick="goTo(2, 'forward')">Başlayalım →</button>
+      </div>
+    </div>
+
+    <!-- ─── STEP 2: BRANCHE ─── -->
+    <div class="step" id="step-2">
+      <div class="step-header">
+        <div class="step-eyebrow">Adım 2 / 6</div>
+        <div class="step-title">İşletme Türü</div>
+        <div class="step-subtitle">Salonunuzun türünü seçin. Hizmet şablonları buna göre hazırlanacak.</div>
+      </div>
+
+      <div class="branche-grid" id="branche-grid"></div>
+
+      <div class="nav-actions">
+        <button class="btn-back" onclick="goTo(1, 'back')">← Geri</button>
+        <button class="btn-next" id="btn-branche-next" onclick="validateBranche()" disabled
+                style="opacity:.45;transition:opacity .2s">Devam Et →</button>
+      </div>
+    </div>
+
+    <!-- ─── STEP 3: SALON BILGILERI ─── -->
+    <div class="step" id="step-3">
+      <div class="step-header">
+        <div class="step-eyebrow">Adım 3 / 6</div>
+        <div class="step-title">Salon Bilgileri</div>
+        <div class="step-subtitle">Salonunuz hakkında temel bilgileri girin.</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="inp-salon-name">Salon Adı</label>
+        <input class="form-input" type="text" id="inp-salon-name"
+               placeholder="Örn. Ahmet's Barber" autocomplete="organization">
+        <div class="form-error-msg" id="err-salon-name">Salon adı zorunludur.</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="inp-city">Şehir</label>
+        <input class="form-input" type="text" id="inp-city"
+               placeholder="Örn. İstanbul" autocomplete="address-level2">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="inp-tel">Telefon</label>
+        <input class="form-input" type="tel" id="inp-tel"
+               placeholder="+90 555 000 00 00" autocomplete="tel">
+      </div>
+
+      <div class="nav-actions">
+        <button class="btn-back" onclick="goTo(2, 'back')">← Geri</button>
+        <button class="btn-next" onclick="validateAndGo(3)">Devam Et →</button>
+      </div>
+    </div>
+
+    <!-- ─── STEP 4: CALISANLAR ─── -->
+    <div class="step" id="step-4">
+      <div class="step-header">
+        <div class="step-eyebrow">Adım 4 / 6</div>
+        <div class="step-title">Çalışanlarınız</div>
+        <div class="step-subtitle">Kaç çalışanla başlıyorsunuz?</div>
+      </div>
+
+      <div class="stepper-wrap">
+        <div class="stepper-label">Çalışan sayısı:</div>
+        <div class="stepper-control">
+          <button class="stepper-btn" id="btn-minus" onclick="changeStaffCount(-1)" disabled>−</button>
+          <div class="stepper-value" id="staff-count-display">1</div>
+          <button class="stepper-btn" id="btn-plus" onclick="changeStaffCount(1)">+</button>
+        </div>
+      </div>
+
+      <div class="staff-inputs-wrap" id="staff-inputs"></div>
+
+      <div class="nav-actions">
+        <button class="btn-back" onclick="goTo(3, 'back')">← Geri</button>
+        <button class="btn-next" onclick="goTo(5, 'forward')">Devam Et →</button>
+      </div>
+    </div>
+
+    <!-- ─── STEP 5: HIZMETLER ─── -->
+    <div class="step" id="step-5">
+      <div class="step-header">
+        <div class="step-eyebrow">Adım 5 / 6</div>
+        <div class="step-title">Hizmetleriniz</div>
+        <div class="step-subtitle">Salonunuzun sunduğu hizmetleri seçin.</div>
+      </div>
+
+      <div class="service-list" id="service-list"></div>
+      <div class="selected-count-note" id="service-count-note">
+        <span id="service-count-num">2</span> hizmet seçildi
+      </div>
+
+      <div class="nav-actions">
+        <button class="btn-back" onclick="goTo(4, 'back')">← Geri</button>
+        <button class="btn-next" onclick="goTo(6, 'forward')">Devam Et →</button>
+      </div>
+    </div>
+
+    <!-- ─── STEP 6: DONE ─── -->
+    <div class="step" id="step-6">
+      <div class="done-wrap">
+        <div class="done-checkmark-ring">
+          <svg class="done-checkmark-svg" viewBox="0 0 44 44">
+            <path d="M10 22 L19 31 L34 14"/>
+          </svg>
+        </div>
+        <div class="done-title">Salonunuz hazır!</div>
+        <div class="done-subtitle">
+          Harika! Her şey ayarlandı.<br>
+          Artık çevrimiçi randevu almaya başlayabilirsiniz.
+        </div>
+        <div class="done-summary-card">
+          <div class="done-summary-title">Kurulum Özeti</div>
+          <div class="done-summary-row">
+            <div class="done-summary-icon">🏪</div>
+            <div class="done-summary-key">Salon</div>
+            <div class="done-summary-val gold" id="done-salon-name">—</div>
+          </div>
+          <div class="done-summary-row">
+            <div class="done-summary-icon" id="done-branche-icon">✂️</div>
+            <div class="done-summary-key">İşletme Türü</div>
+            <div class="done-summary-val" id="done-branche-name">—</div>
+          </div>
+          <div class="done-summary-row">
+            <div class="done-summary-icon">📍</div>
+            <div class="done-summary-key">Şehir</div>
+            <div class="done-summary-val" id="done-city">—</div>
+          </div>
+          <div class="done-summary-row">
+            <div class="done-summary-icon">👥</div>
+            <div class="done-summary-key">Çalışan</div>
+            <div class="done-summary-val" id="done-staff-count">—</div>
+          </div>
+          <div class="done-summary-row">
+            <div class="done-summary-icon">✂️</div>
+            <div class="done-summary-key">Hizmet</div>
+            <div class="done-summary-val" id="done-service-count">—</div>
+          </div>
+        </div>
+      </div>
+      <div style="width:100%; animation: fadeUp 0.4s 0.7s ease both;">
+        <a href="dashboard.html" class="btn-next" id="btn-go-dashboard"
+           style="display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;border-radius:var(--radius-sm);padding:15px 20px;font-size:0.92rem;font-weight:700;color:#080808;background:var(--gold);">
+          Panele Git →
+        </a>
+        <a href="dashboard.html" class="btn-later" id="btn-later">Daha sonra tamamla</a>
+      </div>
+    </div>
+
+  </div><!-- /steps-container -->
+</div><!-- /page-wrap -->
+
+<footer class="site-footer">
+  Randevu Deluxe &middot; Tüm hakları saklıdır
+</footer>
+
+<script>
+/* ============================================================
+   STATE
+============================================================ */
+const state = {
+  currentStep: 1,
+  selectedBranche: null,   // { key, icon, name, color }
+  staffCount: 1,
+  staffNames: [''],
+  selectedServices: new Set(), // populated from SERVICES_LIST defaultOn on init
+};
+
+/* ============================================================
+   BRANCHES DATA
+============================================================ */
+const BRANCHES_OB = [
+  { key:'kuafor',  icon:'✂️',  name:'Kuaför',            desc:'Bayan kuaför & saç bakımı',          color:'#C9A84C' },
+  { key:'berber',  icon:'🪒',  name:'Berber',             desc:'Erkek berber & tıraş salonu',        color:'#00C8FF' },
+  { key:'beauty',  icon:'💄',  name:'Beauty Studio',      desc:'Makyaj & güzellik merkezi',           color:'#FF69B4' },
+  { key:'nagel',   icon:'💅',  name:'Nagelstudio',        desc:'Manikür, pedikür & nail art',        color:'#FF6B9D' },
+  { key:'masaj',   icon:'💆',  name:'Masaj & Wellness',   desc:'Masaj, rahatlama & wellness',         color:'#48C774' },
+  { key:'estet',   icon:'🌿',  name:'Estetisyen / Cilt',  desc:'Cilt bakımı & estetik uygulamalar',  color:'#8B5CF6' },
+  { key:'spa',     icon:'🛁',  name:'SPA & Hamam',        desc:'SPA, hamam & bütünsel bakım',        color:'#06B6D4' },
+];
+
+/* ============================================================
+   SERVICES DATA
+============================================================ */
+const SERVICES_LIST = [
+  { name: 'Saç Kesimi',        icon: '✂️',  defaultOn: true  },
+  { name: 'Sakal Tıraşı',      icon: '🪒',  defaultOn: true  },
+  { name: 'Saç Boyama',        icon: '🎨',  defaultOn: false },
+  { name: 'Keratin Bakımı',    icon: '✨',  defaultOn: false },
+  { name: 'Manikür & Pedikür', icon: '💅',  defaultOn: false },
+  { name: 'Cilt Bakımı',       icon: '🌿',  defaultOn: false },
+  { name: 'Masaj',             icon: '💆',  defaultOn: false },
+];
+
+/* ============================================================
+   PROGRESS BAR
+============================================================ */
+function updateProgress(step) {
+  document.getElementById('progress-fill').style.width = Math.round(step * 100 / 6) + '%';
+  document.getElementById('progress-text').textContent = step;
+}
+
+/* ============================================================
+   STEP NAVIGATION
+============================================================ */
+function goTo(step, direction) {
+  const progressWrap = document.getElementById('progress-bar-wrap');
+  progressWrap.style.display = step === 1 ? 'none' : 'block';
+
+  const current = document.getElementById('step-' + state.currentStep);
+  const next    = document.getElementById('step-' + step);
+
+  current.classList.remove('active', 'enter-right', 'enter-left');
+  current.style.display = 'none';
+
+  next.classList.remove('enter-right', 'enter-left');
+  next.classList.add('active', direction === 'forward' ? 'enter-right' : 'enter-left');
+  next.style.display = '';
+
+  state.currentStep = step;
+  updateProgress(step);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  if (step === 2) renderBrancheCards();
+  if (step === 4) renderStaffInputs();
+  if (step === 5) renderServiceList();
+  if (step === 6) populateDoneSummary();
+}
+
+function validateAndGo(fromStep) {
+  if (fromStep === 3) {
+    const nameInput = document.getElementById('inp-salon-name');
+    const errEl     = document.getElementById('err-salon-name');
+    if (!nameInput.value.trim()) {
+      nameInput.classList.add('error');
+      errEl.classList.add('visible');
+      nameInput.focus();
+      return;
+    }
+    nameInput.classList.remove('error');
+    errEl.classList.remove('visible');
+    goTo(4, 'forward');
+  }
+}
+
+/* ============================================================
+   STEP 2: BRANCHE SELECTION
+============================================================ */
+function renderBrancheCards() {
+  const grid = document.getElementById('branche-grid');
+  grid.innerHTML = BRANCHES_OB.map(b => `
+    <div class="branche-card ${state.selectedBranche && state.selectedBranche.key === b.key ? 'selected' : ''}"
+         style="--branche-color:${b.color}"
+         onclick="selectBranche('${b.key}')">
+      <div class="branche-icon">${b.icon}</div>
+      <div class="branche-info">
+        <div class="branche-name">${b.name}</div>
+        <div class="branche-desc">${b.desc}</div>
+      </div>
+      <div class="branche-check">✓</div>
+    </div>
+  `).join('');
+}
+
+function selectBranche(key) {
+  const b = BRANCHES_OB.find(x => x.key === key);
+  if (!b) return;
+  state.selectedBranche = b;
+  renderBrancheCards();
+  const btn = document.getElementById('btn-branche-next');
+  if (btn) { btn.disabled = false; btn.style.opacity = '1'; }
+}
+
+function validateBranche() {
+  if (!state.selectedBranche) return;
+  goTo(3, 'forward');
+}
+
+/* ============================================================
+   STEP 3: STAFF STEPPER
+============================================================ */
+function changeStaffCount(delta) {
+  const newCount = Math.max(1, Math.min(20, state.staffCount + delta));
+  state.staffCount = newCount;
+
+  // Grow or shrink staffNames array
+  while (state.staffNames.length < newCount) state.staffNames.push('');
+  state.staffNames = state.staffNames.slice(0, newCount);
+
+  document.getElementById('staff-count-display').textContent = newCount;
+  document.getElementById('btn-minus').disabled = (newCount <= 1);
+  document.getElementById('btn-plus').disabled  = (newCount >= 20);
+
+  renderStaffInputs();
+}
+
+function renderStaffInputs() {
+  const wrap = document.getElementById('staff-inputs');
+  const SHOW_MAX = 5;
+  const count    = state.staffCount;
+  const showN    = Math.min(count, SHOW_MAX);
+
+  wrap.innerHTML = '';
+
+  for (let i = 0; i < showN; i++) {
+    const row = document.createElement('div');
+    row.className = 'staff-input-row';
+    row.innerHTML = `
+      <div class="staff-input-num">${i + 1}</div>
+      <input class="form-input" type="text"
+             placeholder="Çalışan adı"
+             value="${escHtml(state.staffNames[i] || '')}"
+             data-idx="${i}"
+             style="margin:0"
+             oninput="state.staffNames[${i}] = this.value">
+    `;
+    wrap.appendChild(row);
+  }
+
+  if (count > SHOW_MAX) {
+    const more = document.createElement('div');
+    more.className = 'staff-more-badge';
+    more.textContent = `+ ${count - SHOW_MAX} çalışan daha`;
+    wrap.appendChild(more);
+  }
+}
+
+/* ============================================================
+   STEP 4: SERVICES
+============================================================ */
+function renderServiceList() {
+  const list = document.getElementById('service-list');
+  list.innerHTML = SERVICES_LIST.map((s, i) => `
+    <div class="service-check-item ${state.selectedServices.has(i) ? 'checked' : ''}"
+         onclick="toggleService(${i})">
+      <div class="service-check-box">${state.selectedServices.has(i) ? '✓' : ''}</div>
+      <div class="service-check-icon">${s.icon}</div>
+      <div class="service-check-name">${s.name}</div>
+    </div>
+  `).join('');
+  updateServiceCount();
+}
+
+function toggleService(index) {
+  if (state.selectedServices.has(index)) {
+    state.selectedServices.delete(index);
+  } else {
+    state.selectedServices.add(index);
+  }
+  renderServiceList();
+}
+
+function updateServiceCount() {
+  const n = state.selectedServices.size;
+  document.getElementById('service-count-num').textContent = n;
+}
+
+/* ============================================================
+   STEP 6: SUMMARY + SAVE
+============================================================ */
+function populateDoneSummary() {
+  const salonName = document.getElementById('inp-salon-name').value.trim() || '—';
+  const city      = document.getElementById('inp-city').value.trim() || '—';
+  const branche   = state.selectedBranche;
+
+  document.getElementById('done-salon-name').textContent    = salonName;
+  document.getElementById('done-branche-icon').textContent  = branche ? branche.icon : '🏪';
+  document.getElementById('done-branche-name').textContent  = branche ? branche.name : '—';
+  document.getElementById('done-city').textContent          = city;
+  document.getElementById('done-staff-count').textContent   = state.staffCount + ' çalışan';
+  document.getElementById('done-service-count').textContent = state.selectedServices.size + ' hizmet';
+
+  // Save to localStorage
+  const setup = {
+    salonName,
+    city,
+    phone:      document.getElementById('inp-tel').value.trim(),
+    branche:    branche ? { key: branche.key, name: branche.name, icon: branche.icon } : null,
+    staffCount: state.staffCount,
+    staffNames: state.staffNames.filter(n => n.trim() !== ''),
+    services:   Array.from(state.selectedServices).map(i => SERVICES_LIST[i].name),
+    setupAt:    new Date().toISOString(),
+  };
+  localStorage.setItem('rd_onboarding_complete', 'true');
+  localStorage.setItem('rd_salon_setup', JSON.stringify(setup));
+}
+
+/* ============================================================
+   UTILS
+============================================================ */
+function escHtml(str) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+/* ============================================================
+   INIT
+============================================================ */
+document.addEventListener('DOMContentLoaded', () => {
+  updateProgress(1);
+
+  // Initialize service defaults from data
+  SERVICES_LIST.forEach((s, i) => { if (s.defaultOn) state.selectedServices.add(i); });
+
+  // Init staff inputs for when step 4 is visited
+  renderStaffInputs();
+
+  // Salon name: clear error on input
+  document.getElementById('inp-salon-name').addEventListener('input', function() {
+    if (this.value.trim()) {
+      this.classList.remove('error');
+      document.getElementById('err-salon-name').classList.remove('visible');
+    }
+  });
+
+  // Step 1 has no progress bar number shown yet, hide label on step 1
+  document.getElementById('progress-bar-wrap').style.display = 'none';
+});
+
+</script>
+
+<script>
+(function(){
+  var t=localStorage.getItem('rd-theme')||'dark';
+  document.documentElement.setAttribute('data-theme',t);
+  var b=document.getElementById('ob-theme-btn');
+  if(b) b.textContent=t==='dark'?'☀️':'🌙';
+})();
+function toggleObTheme(){
+  var c=document.documentElement.getAttribute('data-theme')||'dark';
+  var n=c==='dark'?'light':'dark';
+  document.documentElement.setAttribute('data-theme',n);
+  localStorage.setItem('rd-theme',n);
+  var b=document.getElementById('ob-theme-btn');
+  if(b) b.textContent=n==='dark'?'☀️':'🌙';
+}
+</script>
+
+</body>
+</html>

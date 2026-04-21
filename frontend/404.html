@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="shortcut icon" href="favicon.svg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sayfa Bulunamadı — Randevu Deluxe</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+  <style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root,[data-theme="dark"]{
+  --bg:#07070A; --s1:#0D0D12; --s2:#131318; --s3:#1A1A20;
+  --br:rgba(255,255,255,.07); --br2:rgba(255,255,255,.12);
+  --tx:#EDE9DF; --m1:#9A9690; --m2:#6A6660;
+  --g1:#C9A84C; --g2:#E2C06A;
+  --nav-bg:rgba(7,7,10,.85);
+}
+[data-theme="light"]{
+  --bg:#FFFFFF; --s1:#FAFAFA; --s2:#F4F4F6; --s3:#EBEBEE;
+  --br:rgba(0,0,0,.08); --br2:rgba(0,0,0,.14);
+  --tx:#111111; --m1:#52525B; --m2:#71717A;
+  --g1:#9A6D1A; --g2:#B8882A;
+  --nav-bg:rgba(255,255,255,.95);
+}
+html{font-size:16px;scroll-behavior:smooth}
+body{
+  font-family:'DM Sans',sans-serif;
+  background:var(--bg);color:var(--tx);
+  min-height:100vh;display:flex;flex-direction:column;
+  transition:background .3s,color .3s;overflow-x:hidden;
+}
+
+/* glow */
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(201,168,76,.1) 0%,transparent 65%);
+}
+*{position:relative;z-index:1}
+
+/* NAV */
+nav{
+  position:sticky;top:0;z-index:100;
+  height:60px;padding:0 20px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--nav-bg);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--br);
+  transition:background .3s;
+}
+.nav-logo{
+  font-family:'Playfair Display',serif;font-size:1.1rem;
+  color:var(--tx);text-decoration:none;
+}
+.nav-logo b{color:var(--g1)}
+.nav-r{display:flex;align-items:center;gap:10px}
+.theme-btn{
+  background:transparent;border:1px solid var(--br2);color:var(--m1);
+  border-radius:8px;padding:6px 10px;font-size:.8rem;font-weight:600;
+  cursor:pointer;font-family:inherit;transition:all .2s;
+}
+
+/* MAIN */
+main{
+  flex:1;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:48px 20px;text-align:center;
+}
+
+.err-code{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(7rem,22vw,11rem);
+  font-weight:900;line-height:1;
+  background:linear-gradient(135deg,var(--g2) 0%,var(--g1) 50%,#7A5010 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+  margin-bottom:8px;
+  letter-spacing:-4px;
+}
+
+.err-icon{font-size:3rem;margin-bottom:16px;display:block}
+
+.err-title{
+  font-size:clamp(1.4rem,5vw,2rem);
+  font-weight:700;margin-bottom:12px;
+  color:var(--tx);
+}
+
+.err-sub{
+  font-size:1rem;color:var(--m1);
+  line-height:1.7;max-width:400px;margin:0 auto 36px;
+}
+
+.err-actions{
+  display:flex;flex-wrap:wrap;gap:12px;
+  justify-content:center;
+}
+
+.btn-gold{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:13px 24px;background:var(--g1);color:#080808;
+  border:none;border-radius:12px;font-family:inherit;
+  font-size:.9rem;font-weight:700;cursor:pointer;
+  text-decoration:none;transition:all .2s;
+}
+.btn-gold:hover{background:var(--g2);transform:translateY(-2px);box-shadow:0 10px 30px rgba(201,168,76,.3)}
+
+.btn-ghost{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:13px 24px;background:transparent;
+  border:1px solid var(--br2);border-radius:12px;
+  font-family:inherit;font-size:.9rem;color:var(--m1);
+  cursor:pointer;text-decoration:none;transition:all .2s;
+}
+.btn-ghost:hover{border-color:var(--g1);color:var(--g2)}
+
+/* Quick links */
+.quick-links{
+  margin-top:48px;display:flex;flex-wrap:wrap;
+  gap:10px;justify-content:center;
+}
+.quick-link{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:8px 16px;background:var(--s2);border:1px solid var(--br);
+  border-radius:8px;font-size:.82rem;color:var(--m1);
+  text-decoration:none;transition:all .18s;
+}
+.quick-link:hover{border-color:var(--g1);color:var(--g2);background:var(--s3)}
+.quick-lbl{font-size:.72rem;color:var(--m2);margin-top:16px;width:100%;text-align:center}
+
+/* FOOTER */
+footer{
+  text-align:center;padding:20px;
+  font-size:.76rem;color:var(--m2);
+  border-top:1px solid var(--br);
+}
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo"><b>Randevu</b>Deluxe</a>
+  <div class="nav-r">
+    <button class="theme-btn" onclick="toggle404Theme()" id="t4-btn">☀️</button>
+    <a href="index.html" class="btn-ghost" style="padding:7px 14px;font-size:.82rem">Ana Sayfa</a>
+  </div>
+</nav>
+
+<main>
+  <span class="err-icon">✂️</span>
+  <div class="err-code">404</div>
+  <h1 class="err-title">Sayfa bulunamadı</h1>
+  <p class="err-sub">
+    Aradığınız sayfa kaldırılmış, taşınmış ya da hiç var olmamış olabilir.<br>
+    Endişelenmeyin, sizi doğru yere götürelim.
+  </p>
+
+  <div class="err-actions">
+    <a href="index.html" class="btn-gold">🏠 Ana Sayfaya Dön</a>
+    <a href="dashboard.html" class="btn-ghost">📊 Salon Paneli</a>
+  </div>
+
+  <div class="quick-links">
+    <span class="quick-lbl">Hızlı bağlantılar</span>
+    <a href="booking.html"    class="quick-link">📅 Randevu Al</a>
+    <a href="search.html"     class="quick-link">🔍 Salon Ara</a>
+    <a href="onboarding.html" class="quick-link">🚀 Ücretsiz Başla</a>
+    <a href="admin.html"      class="quick-link">🔧 Admin</a>
+  </div>
+</main>
+
+<footer>© 2026 Soft-Deluxe · Randevu Deluxe · İstanbul, Türkiye</footer>
+
+<script>
+(function(){
+  var t = localStorage.getItem('rd-theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', t);
+  document.getElementById('t4-btn').textContent = t === 'dark' ? '☀️' : '🌙';
+})();
+function toggle404Theme(){
+  var c = document.documentElement.getAttribute('data-theme') || 'dark';
+  var n = c === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', n);
+  localStorage.setItem('rd-theme', n);
+  document.getElementById('t4-btn').textContent = n === 'dark' ? '☀️' : '🌙';
+}
+</script>
+</body>
+</html>

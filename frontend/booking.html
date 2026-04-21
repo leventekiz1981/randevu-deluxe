@@ -1,0 +1,1749 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="shortcut icon" href="favicon.svg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0D0D12">
+  <title>Randevu Al — Ahmet's Barber</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+
+  <style>
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       DESIGN TOKENS
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    :root,[data-theme="dark"] {
+      --bg:        #0D0D12;
+      --card-bg:   #131318;
+      --card-bg2:  #1A1A22;
+      --gold:      #C9A84C;
+      --gold-dim:  rgba(201,168,76,0.15);
+      --gold-glow: rgba(201,168,76,0.25);
+      --cream:     #EDE8DC;
+      --tx1:       #EDE8DC;
+      --tx2:       #9A9AA8;
+      --tx3:       #5A5A6A;
+      --border:    rgba(255,255,255,0.08);
+      --border-hi: rgba(255,255,255,0.14);
+      --danger:    #E05252;
+      --success:   #52C27A;
+      --wa:        #25D366;
+      --accent:    #00C8FF;
+      --pink:      #E879A3;
+      --radius-card: 16px;
+      --radius-sm:   10px;
+      --shadow-card: 0 2px 20px rgba(0,0,0,0.4);
+    }
+    [data-theme="light"]{
+      --bg:#FFFFFF; --card-bg:#F5F5F7; --card-bg2:#EBEBED;
+      --gold:#9A6D1A; --gold-dim:rgba(154,109,26,0.12); --gold-glow:rgba(154,109,26,0.2);
+      --cream:#111111; --tx1:#111111; --tx2:#52525B; --tx3:#9CA3AF;
+      --border:rgba(0,0,0,0.09); --border-hi:rgba(0,0,0,0.16);
+      --danger:#DC2626; --success:#16A34A; --wa:#128C4A; --accent:#0099CC; --pink:#C2185B;
+      --shadow-card:0 2px 16px rgba(0,0,0,0.08);
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       RESET & BASE
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    *, *::before, *::after {
+      margin: 0; padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+    html {
+      font-size: 16px;
+      -webkit-text-size-adjust: 100%;
+      scroll-behavior: smooth;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--tx1);
+      min-height: 100vh;
+      min-height: 100dvh;
+      line-height: 1.5;
+      padding-bottom: env(safe-area-inset-bottom, 24px);
+      overflow-x: hidden;
+      transition: background .3s, color .3s;
+    }
+    input, textarea, button, select {
+      font-family: inherit;
+    }
+    button { cursor: pointer; border: none; background: none; }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       LAYOUT SHELL
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .page-wrap {
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 0 16px 40px;
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       SALON HEADER
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .salon-header {
+      text-align: center;
+      padding: 32px 16px 24px;
+    }
+    .salon-avatar {
+      width: 72px;
+      height: 72px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, #1E1A12 0%, #2A2416 100%);
+      border: 2px solid var(--gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      font-family: 'Playfair Display', serif;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--gold);
+      box-shadow: 0 0 24px var(--gold-glow);
+    }
+    .salon-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--cream);
+      margin-bottom: 6px;
+    }
+    .salon-meta {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-top: 4px;
+    }
+    .salon-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.8rem;
+      color: var(--tx2);
+    }
+    .salon-meta-item svg {
+      width: 14px; height: 14px;
+      flex-shrink: 0;
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       PROGRESS BAR
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .progress-wrap {
+      margin-bottom: 24px;
+    }
+    .progress-bar-track {
+      height: 3px;
+      background: var(--border);
+      border-radius: 99px;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold), #E8C96A);
+      border-radius: 99px;
+      transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .progress-steps {
+      display: flex;
+      justify-content: space-between;
+      position: relative;
+    }
+    .progress-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      flex: 1;
+    }
+    .progress-step-dot {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 2px solid var(--border-hi);
+      background: var(--card-bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: var(--tx3);
+      transition: all 0.3s ease;
+      position: relative;
+      z-index: 1;
+    }
+    .progress-step.active .progress-step-dot {
+      border-color: var(--gold);
+      background: var(--gold);
+      color: #080808;
+      box-shadow: 0 0 12px var(--gold-glow);
+    }
+    .progress-step.done .progress-step-dot {
+      border-color: var(--gold);
+      background: var(--gold-dim);
+      color: var(--gold);
+    }
+    .progress-step-label {
+      font-size: 0.65rem;
+      color: var(--tx3);
+      font-weight: 500;
+      letter-spacing: 0.2px;
+      transition: color 0.3s ease;
+      white-space: nowrap;
+    }
+    .progress-step.active .progress-step-label {
+      color: var(--gold);
+      font-weight: 600;
+    }
+    .progress-step.done .progress-step-label {
+      color: var(--tx2);
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       STEP PANELS (slide transitions)
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .steps-viewport {
+      position: relative;
+      overflow: hidden;
+    }
+    .step-panel {
+      display: none;
+      animation-duration: 0.32s;
+      animation-fill-mode: both;
+      animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .step-panel.active {
+      display: block;
+    }
+    .step-panel.slide-in-right  { animation-name: slideInRight; }
+    .step-panel.slide-in-left   { animation-name: slideInLeft; }
+    .step-panel.slide-out-right { animation-name: slideOutRight; }
+    .step-panel.slide-out-left  { animation-name: slideOutLeft; }
+
+    @keyframes slideInRight {
+      from { transform: translateX(48px); opacity: 0; }
+      to   { transform: translateX(0);    opacity: 1; }
+    }
+    @keyframes slideInLeft {
+      from { transform: translateX(-48px); opacity: 0; }
+      to   { transform: translateX(0);     opacity: 1; }
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       STEP HEADING
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .step-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--cream);
+      margin-bottom: 4px;
+    }
+    .step-subtitle {
+      font-size: 0.78rem;
+      color: var(--tx2);
+      margin-bottom: 18px;
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       STEP 1: SERVICE GRID
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .service-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .service-card {
+      background: var(--card-bg);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: 14px 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-height: 100px;
+    }
+    .service-card:active { transform: scale(0.97); }
+    .service-card.selected {
+      border-color: var(--gold);
+      background: #1A1810;
+      box-shadow: 0 0 0 1px var(--gold), inset 0 0 20px rgba(201,168,76,0.06);
+    }
+    .service-icon-wrap {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.05rem;
+      flex-shrink: 0;
+    }
+    .service-name {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--tx1);
+      line-height: 1.3;
+    }
+    .service-meta {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .service-duration {
+      font-size: 0.7rem;
+      color: var(--tx2);
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+    .service-price {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--gold);
+      margin-top: auto;
+    }
+    .service-price.free {
+      color: var(--tx2);
+      font-weight: 500;
+      font-style: italic;
+      font-size: 0.7rem;
+    }
+    .service-card.selected .service-check {
+      display: flex;
+    }
+    .service-check {
+      display: none;
+      position: absolute;
+      top: 10px; right: 10px;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: var(--gold);
+      color: #080808;
+      font-size: 0.6rem;
+      font-weight: 700;
+      align-items: center;
+      justify-content: center;
+    }
+    .service-card { position: relative; }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       STEP 2: STAFF GRID
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .staff-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .staff-card {
+      background: var(--card-bg);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: 14px 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .staff-card:active { transform: scale(0.98); }
+    .staff-card.selected {
+      border-color: var(--gold);
+      background: #1A1810;
+      box-shadow: 0 0 0 1px var(--gold), inset 0 0 20px rgba(201,168,76,0.06);
+    }
+    .staff-avatar {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #080808;
+      flex-shrink: 0;
+    }
+    .staff-info { flex: 1; }
+    .staff-name {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--tx1);
+      margin-bottom: 2px;
+    }
+    .staff-title {
+      font-size: 0.75rem;
+      color: var(--tx2);
+    }
+    .staff-card-radio {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid var(--border-hi);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+    }
+    .staff-card.selected .staff-card-radio {
+      border-color: var(--gold);
+      background: var(--gold);
+    }
+    .staff-card.selected .staff-card-radio::after {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #080808;
+    }
+    .staff-any .staff-avatar {
+      background: var(--card-bg2);
+      font-size: 1.3rem;
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       STEP 3: DATE + TIME PICKER
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .date-scroll-wrap {
+      overflow-x: auto;
+      margin: 0 -16px;
+      padding: 4px 16px 8px;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      margin-bottom: 20px;
+    }
+    .date-scroll-wrap::-webkit-scrollbar { display: none; }
+    .date-scroll {
+      display: flex;
+      gap: 8px;
+      width: max-content;
+    }
+    .date-pill {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: var(--card-bg);
+      border: 2px solid var(--border);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      min-width: 52px;
+    }
+    .date-pill:active { transform: scale(0.95); }
+    .date-pill.today {
+      border-color: var(--border-hi);
+    }
+    .date-pill.today .date-day-name {
+      color: var(--accent);
+    }
+    .date-pill.selected {
+      border-color: var(--gold);
+      background: #1A1810;
+      box-shadow: 0 0 0 1px var(--gold);
+    }
+    .date-pill.closed {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+    .date-day-name {
+      font-size: 0.65rem;
+      font-weight: 500;
+      color: var(--tx2);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .date-day-num {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--tx1);
+      line-height: 1;
+    }
+    .date-pill.selected .date-day-name,
+    .date-pill.selected .date-day-num {
+      color: var(--gold);
+    }
+    .date-closed-badge {
+      font-size: 0.55rem;
+      color: var(--tx3);
+      letter-spacing: 0.3px;
+    }
+
+    .time-section-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--tx2);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 10px;
+      margin-top: 16px;
+    }
+    .time-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .time-slot {
+      padding: 10px 4px;
+      border-radius: var(--radius-sm);
+      border: 1.5px solid var(--border);
+      background: var(--card-bg);
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--tx1);
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .time-slot:active:not(.unavailable) { transform: scale(0.95); }
+    .time-slot.selected {
+      border-color: var(--gold);
+      background: #1A1810;
+      color: var(--gold);
+      font-weight: 700;
+      box-shadow: 0 0 0 1px var(--gold);
+    }
+    .time-slot.unavailable {
+      opacity: 0.25;
+      cursor: not-allowed;
+      text-decoration: line-through;
+    }
+    .no-date-msg {
+      text-align: center;
+      padding: 32px 0;
+      color: var(--tx3);
+      font-size: 0.85rem;
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       STEP 4: FORM
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .form-group {
+      margin-bottom: 14px;
+    }
+    .form-label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--tx2);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 6px;
+    }
+    .form-label .optional {
+      color: var(--tx3);
+      font-weight: 400;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+    .form-input {
+      width: 100%;
+      background: var(--card-bg);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      font-size: 0.9rem;
+      color: var(--tx1);
+      transition: border-color 0.2s ease;
+      outline: none;
+      -webkit-appearance: none;
+    }
+    .form-input::placeholder { color: var(--tx3); }
+    .form-input:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(201,168,76,0.12);
+    }
+    .form-input.error {
+      border-color: var(--danger);
+      box-shadow: 0 0 0 3px rgba(224,82,82,0.12);
+    }
+    .form-error {
+      font-size: 0.72rem;
+      color: var(--danger);
+      margin-top: 4px;
+      display: none;
+    }
+    .form-error.visible { display: block; }
+    textarea.form-input {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    /* WA reminder toggle */
+    .wa-toggle {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--card-bg);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: 12px 14px;
+      cursor: pointer;
+      margin-bottom: 20px;
+      transition: border-color 0.2s ease;
+    }
+    .wa-toggle.checked {
+      border-color: var(--wa);
+      background: rgba(37,211,102,0.05);
+    }
+    .wa-icon-circle {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(37,211,102,0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+    .wa-toggle-text { flex: 1; }
+    .wa-toggle-title {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--tx1);
+    }
+    .wa-toggle-sub {
+      font-size: 0.72rem;
+      color: var(--tx2);
+    }
+    .wa-checkbox-visual {
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      border: 2px solid var(--border-hi);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+      font-size: 0.7rem;
+      color: transparent;
+    }
+    .wa-toggle.checked .wa-checkbox-visual {
+      background: var(--wa);
+      border-color: var(--wa);
+      color: #fff;
+    }
+
+    /* Summary card in step 4 */
+    .summary-card {
+      background: var(--card-bg);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+    .summary-card-title {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--tx2);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 12px;
+    }
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 6px 0;
+      gap: 12px;
+    }
+    .summary-row + .summary-row {
+      border-top: 1px solid var(--border);
+    }
+    .summary-row .s-label {
+      font-size: 0.78rem;
+      color: var(--tx2);
+      flex-shrink: 0;
+    }
+    .summary-row .s-val {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--tx1);
+      text-align: right;
+    }
+    .summary-row.total .s-label,
+    .summary-row.total .s-val {
+      color: var(--gold);
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       NAVIGATION BUTTONS
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .nav-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 8px;
+      align-items: center;
+    }
+    .btn-back {
+      padding: 14px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--tx2);
+      background: transparent;
+      border: 1.5px solid var(--border);
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    .btn-back:hover { color: var(--tx1); border-color: var(--border-hi); }
+    .btn-back:disabled { opacity: 0.3; cursor: not-allowed; }
+    .btn-next {
+      flex: 1;
+      padding: 15px 20px;
+      border-radius: var(--radius-sm);
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #080808;
+      background: var(--gold);
+      border: none;
+      transition: all 0.2s ease;
+      letter-spacing: 0.2px;
+    }
+    .btn-next:hover {
+      background: #D9B85C;
+      box-shadow: 0 4px 16px rgba(201,168,76,0.35);
+    }
+    .btn-next:active { transform: scale(0.98); }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       TOAST / INLINE ERROR
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .step-error-msg {
+      display: none;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      background: rgba(224,82,82,0.12);
+      border: 1px solid rgba(224,82,82,0.3);
+      color: var(--danger);
+      font-size: 0.8rem;
+      font-weight: 500;
+      margin-bottom: 12px;
+    }
+    .step-error-msg.visible { display: flex; align-items: center; gap: 8px; }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       CONFIRMATION SCREEN
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    #screen-confirm {
+      display: none;
+      padding-top: 40px;
+    }
+    #screen-confirm.active { display: block; }
+
+    .confirm-checkmark-wrap {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 24px;
+    }
+    .confirm-checkmark {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: rgba(201,168,76,0.12);
+      border: 3px solid var(--gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      color: var(--gold);
+      animation: checkPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+    }
+    @keyframes checkPop {
+      0%   { transform: scale(0) rotate(-15deg); opacity: 0; }
+      60%  { transform: scale(1.15) rotate(5deg); opacity: 1; }
+      100% { transform: scale(1) rotate(0deg); opacity: 1; }
+    }
+    .confirm-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--cream);
+      text-align: center;
+      margin-bottom: 8px;
+    }
+    .confirm-sub {
+      text-align: center;
+      font-size: 0.82rem;
+      color: var(--tx2);
+      margin-bottom: 28px;
+      line-height: 1.6;
+    }
+    .confirm-summary-card {
+      background: var(--card-bg);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: 18px;
+      margin-bottom: 20px;
+    }
+    .confirm-summary-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 8px 0;
+    }
+    .confirm-summary-row + .confirm-summary-row {
+      border-top: 1px solid var(--border);
+    }
+    .confirm-summary-icon {
+      font-size: 1rem;
+      width: 20px;
+      text-align: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .confirm-summary-text { flex: 1; }
+    .confirm-summary-key {
+      font-size: 0.72rem;
+      color: var(--tx2);
+      margin-bottom: 1px;
+    }
+    .confirm-summary-val {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--tx1);
+    }
+    .confirm-summary-val.gold { color: var(--gold); }
+
+    .btn-wa {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 16px;
+      border-radius: var(--radius-sm);
+      background: var(--wa);
+      color: #fff;
+      font-size: 0.92rem;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      text-decoration: none;
+      margin-bottom: 12px;
+      transition: all 0.2s ease;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-wa:hover { background: #20b958; box-shadow: 0 4px 18px rgba(37,211,102,0.3); }
+    .btn-wa:active { transform: scale(0.98); }
+
+    .btn-restart {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 14px;
+      border-radius: var(--radius-sm);
+      background: transparent;
+      border: 1.5px solid var(--border);
+      color: var(--tx2);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-restart:hover { color: var(--tx1); border-color: var(--border-hi); }
+
+    .confirm-note {
+      text-align: center;
+      font-size: 0.72rem;
+      color: var(--tx3);
+      margin-top: 20px;
+      line-height: 1.5;
+    }
+    .confirm-live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(82,194,122,0.12);
+      border: 1px solid rgba(82,194,122,0.3);
+      color: var(--success);
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 99px;
+      margin: 0 auto 20px;
+    }
+    .confirm-live-badge::before {
+      content: '';
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--success);
+      animation: livePulse 1.6s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+    @keyframes livePulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.5; transform: scale(0.8); }
+    }
+    .confirm-live-wrap {
+      display: flex;
+      justify-content: center;
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       MISC
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 20px 0;
+    }
+    .powered-by {
+      text-align: center;
+      font-size: 0.68rem;
+      color: var(--tx3);
+      padding: 24px 0 8px;
+    }
+    .powered-by span { color: var(--gold); font-weight: 600; }
+
+    /* Subtle entrance animation for page load */
+    @keyframes fadeUp {
+      from { transform: translateY(16px); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
+    .fade-up {
+      animation: fadeUp 0.45s ease both;
+    }
+    .fade-up-2 { animation-delay: 0.08s; }
+    .fade-up-3 { animation-delay: 0.14s; }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       RESPONSIVE
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    @media (min-width: 480px) {
+      .salon-name { font-size: 1.75rem; }
+      .service-grid { gap: 12px; }
+    }
+  </style>
+</head>
+<body>
+<button id="bk-theme-btn" onclick="toggleBookingTheme()"
+  style="position:fixed;top:14px;right:14px;z-index:9999;
+         background:var(--card-bg);border:1px solid var(--border-hi);
+         border-radius:8px;padding:7px 11px;font-size:.85rem;
+         cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,.25);
+         transition:all .2s">☀️</button>
+
+<div class="page-wrap">
+
+  <!-- ══════════════════════════════════════════════
+       BOOKING WIZARD
+  ══════════════════════════════════════════════ -->
+  <div id="screen-booking">
+
+    <!-- SALON HEADER -->
+    <div class="salon-header fade-up">
+      <div class="salon-avatar">AB</div>
+      <div class="salon-name">Ahmet's Barber</div>
+      <div class="salon-meta">
+        <span class="salon-meta-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+          Kapalıçarşı, İstanbul
+        </span>
+        <span class="salon-meta-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.7 1.22 2 2 0 012.69 0h3.07c.96 0 1.77.7 1.92 1.63a14 14 0 00.38 1.81c.24.76.04 1.58-.49 2.11L6.12 6.4A16 16 0 0012 12.28l.85-.85c.53-.53 1.35-.73 2.11-.49.6.19 1.2.33 1.81.38.97.16 1.67.99 1.63 1.97z"/></svg>
+          +90 212 555 01 01
+        </span>
+        <span class="salon-meta-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          Pzt–Cmt 09:00–19:00
+        </span>
+      </div>
+    </div>
+
+    <!-- PROGRESS -->
+    <div class="progress-wrap fade-up fade-up-2">
+      <div class="progress-bar-track">
+        <div class="progress-bar-fill" id="progress-fill" style="width: 12.5%"></div>
+      </div>
+      <div class="progress-steps">
+        <div class="progress-step active" id="ps-1">
+          <div class="progress-step-dot">1</div>
+          <div class="progress-step-label">Hizmet</div>
+        </div>
+        <div class="progress-step" id="ps-2">
+          <div class="progress-step-dot">2</div>
+          <div class="progress-step-label">Personel</div>
+        </div>
+        <div class="progress-step" id="ps-3">
+          <div class="progress-step-dot">3</div>
+          <div class="progress-step-label">Tarih & Saat</div>
+        </div>
+        <div class="progress-step" id="ps-4">
+          <div class="progress-step-dot">4</div>
+          <div class="progress-step-label">Bilgiler</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP PANELS -->
+    <div class="steps-viewport fade-up fade-up-3">
+
+      <!-- ─── STEP 1: SERVICE SELECTION ─── -->
+      <div class="step-panel active" id="panel-1">
+        <div class="step-title">Hizmet Seç</div>
+        <div class="step-subtitle">Hangi hizmeti almak istiyorsunuz?</div>
+        <div class="step-error-msg" id="err-1">
+          <span>⚠</span> Lütfen bir hizmet seçin.
+        </div>
+        <div class="service-grid" id="service-grid"></div>
+        <div class="nav-actions">
+          <button class="btn-back" disabled>← Geri</button>
+          <button class="btn-next" onclick="nextStep(1)">Devam Et →</button>
+        </div>
+      </div>
+
+      <!-- ─── STEP 2: STAFF SELECTION ─── -->
+      <div class="step-panel" id="panel-2">
+        <div class="step-title">Personel Seç</div>
+        <div class="step-subtitle">Kim size hizmet versin?</div>
+        <div class="step-error-msg" id="err-2">
+          <span>⚠</span> Lütfen bir personel seçin.
+        </div>
+        <div class="staff-list" id="staff-list"></div>
+        <div class="nav-actions">
+          <button class="btn-back" onclick="prevStep(2)">← Geri</button>
+          <button class="btn-next" onclick="nextStep(2)">Devam Et →</button>
+        </div>
+      </div>
+
+      <!-- ─── STEP 3: DATE & TIME ─── -->
+      <div class="step-panel" id="panel-3">
+        <div class="step-title">Tarih & Saat</div>
+        <div class="step-subtitle">Randevu tarihi ve saatini seçin.</div>
+        <div class="step-error-msg" id="err-3">
+          <span>⚠</span> Lütfen tarih ve saat seçin.
+        </div>
+
+        <div class="date-scroll-wrap">
+          <div class="date-scroll" id="date-scroll"></div>
+        </div>
+
+        <div id="time-picker-wrap">
+          <div class="no-date-msg" id="time-placeholder">Yukarıdan bir tarih seçin.</div>
+          <div id="time-grid-wrap" style="display:none">
+            <div class="time-section-label">Sabah</div>
+            <div class="time-grid" id="grid-morning"></div>
+            <div class="time-section-label">Öğleden Sonra</div>
+            <div class="time-grid" id="grid-afternoon"></div>
+          </div>
+        </div>
+
+        <div class="nav-actions" style="margin-top:20px">
+          <button class="btn-back" onclick="prevStep(3)">← Geri</button>
+          <button class="btn-next" onclick="nextStep(3)">Devam Et →</button>
+        </div>
+      </div>
+
+      <!-- ─── STEP 4: CUSTOMER INFO ─── -->
+      <div class="step-panel" id="panel-4">
+        <div class="step-title">Bilgilerini Gir</div>
+        <div class="step-subtitle">Randevunuzu onaylamak için bilgileriniz gerekiyor.</div>
+
+        <div class="form-group">
+          <label class="form-label" for="inp-name">Ad Soyad</label>
+          <input class="form-input" type="text" id="inp-name" placeholder="Mehmet Yılmaz" autocomplete="name">
+          <div class="form-error" id="err-name">Ad Soyad zorunludur.</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="inp-phone">Telefon</label>
+          <input class="form-input" type="tel" id="inp-phone" placeholder="+90 555 123 45 67" autocomplete="tel">
+          <div class="form-error" id="err-phone">Geçerli bir telefon numarası girin.</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="inp-email">
+            E-posta <span class="optional">(isteğe bağlı)</span>
+          </label>
+          <input class="form-input" type="email" id="inp-email" placeholder="mehmet@ornek.com" autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="inp-notes">
+            Notlar / İstekler <span class="optional">(isteğe bağlı)</span>
+          </label>
+          <textarea class="form-input" id="inp-notes" placeholder="Özel istek veya notunuz varsa..."></textarea>
+        </div>
+
+        <!-- Bildirim Tercihi — dinamik olarak salon ayarlarına göre render edilir -->
+        <div id="notify-pref-wrap"></div>
+
+        <div class="divider"></div>
+
+        <div class="summary-card">
+          <div class="summary-card-title">Randevu Özeti</div>
+          <div class="summary-row">
+            <span class="s-label">Hizmet</span>
+            <span class="s-val" id="sum-service">—</span>
+          </div>
+          <div class="summary-row">
+            <span class="s-label">Personel</span>
+            <span class="s-val" id="sum-staff">—</span>
+          </div>
+          <div class="summary-row">
+            <span class="s-label">Tarih</span>
+            <span class="s-val" id="sum-date">—</span>
+          </div>
+          <div class="summary-row">
+            <span class="s-label">Saat</span>
+            <span class="s-val" id="sum-time">—</span>
+          </div>
+          <div class="summary-row total">
+            <span class="s-label">Ücret</span>
+            <span class="s-val" id="sum-price">—</span>
+          </div>
+        </div>
+
+        <div class="nav-actions">
+          <button class="btn-back" onclick="prevStep(4)">← Geri</button>
+          <button class="btn-next" onclick="submitBooking()">Randevu Kaydet ✓</button>
+        </div>
+      </div>
+
+    </div><!-- /steps-viewport -->
+
+  </div><!-- /screen-booking -->
+
+  <!-- ══════════════════════════════════════════════
+       CONFIRMATION SCREEN
+  ══════════════════════════════════════════════ -->
+  <div id="screen-confirm">
+    <div class="confirm-checkmark-wrap">
+      <div class="confirm-checkmark">✓</div>
+    </div>
+    <div class="confirm-title">Randevunuz Alındı!</div>
+    <div class="confirm-sub">
+      Talebiniz başarıyla iletildi.<br>
+      <span id="confirm-notify-text">Onaylandıktan sonra bildirim alacaksınız.</span>
+    </div>
+
+    <div class="confirm-live-wrap">
+      <div class="confirm-live-badge">⚡ Live — Randevunuz salonun sistemine iletildi.</div>
+    </div>
+
+    <div class="confirm-summary-card">
+      <div class="confirm-summary-row">
+        <div class="confirm-summary-icon">✂️</div>
+        <div class="confirm-summary-text">
+          <div class="confirm-summary-key">Hizmet</div>
+          <div class="confirm-summary-val" id="conf-service">—</div>
+        </div>
+      </div>
+      <div class="confirm-summary-row">
+        <div class="confirm-summary-icon">👤</div>
+        <div class="confirm-summary-text">
+          <div class="confirm-summary-key">Personel</div>
+          <div class="confirm-summary-val" id="conf-staff">—</div>
+        </div>
+      </div>
+      <div class="confirm-summary-row">
+        <div class="confirm-summary-icon">📅</div>
+        <div class="confirm-summary-text">
+          <div class="confirm-summary-key">Tarih & Saat</div>
+          <div class="confirm-summary-val" id="conf-datetime">—</div>
+        </div>
+      </div>
+      <div class="confirm-summary-row">
+        <div class="confirm-summary-icon">👤</div>
+        <div class="confirm-summary-text">
+          <div class="confirm-summary-key">Müşteri</div>
+          <div class="confirm-summary-val" id="conf-customer">—</div>
+        </div>
+      </div>
+      <div class="confirm-summary-row">
+        <div class="confirm-summary-icon">💰</div>
+        <div class="confirm-summary-text">
+          <div class="confirm-summary-key">Ücret</div>
+          <div class="confirm-summary-val gold" id="conf-price">—</div>
+        </div>
+      </div>
+    </div>
+
+    <a id="wa-confirm-link" href="#" target="_blank" class="btn-wa">
+      💬 WhatsApp ile Onayla
+    </a>
+
+    <button class="btn-restart" onclick="resetBooking()">
+      ← Yeni Randevu Al
+    </button>
+
+    <p class="confirm-note" id="confirm-note-text">
+      Randevunuz onaylandıktan sonra bildirim alacaksınız.
+    </p>
+  </div><!-- /screen-confirm -->
+
+  <div class="powered-by">
+    <span>Randevu Deluxe</span> ile güçlendirilmiştir
+  </div>
+
+</div><!-- /page-wrap -->
+
+<script>
+/* ============================================================
+   DATA
+============================================================ */
+const SERVICES = [
+  { id: 1, name: 'Saç Kesimi',        cat: 'Saç',   duration: 30, price: 150,  icon: '✂️',  color: '#C9A84C' },
+  { id: 2, name: 'Saç + Sakal',       cat: 'Saç',   duration: 50, price: 220,  icon: '💈',  color: '#00C8FF' },
+  { id: 3, name: 'Sakal Tıraşı',      cat: 'Saç',   duration: 20, price: 100,  icon: '🪒',  color: '#8B5CF6' },
+  { id: 4, name: 'Çocuk Kesimi',      cat: 'Saç',   duration: 20, price: 100,  icon: '👦',  color: '#52C27A' },
+  { id: 5, name: 'Saç Boyama',        cat: 'Renk',  duration: null,price: null, icon: '🎨',  color: '#E879A3' },
+  { id: 6, name: 'Keratin Bakımı',    cat: 'Bakım', duration: 90, price: 480,  icon: '✨',  color: '#F59E0B' },
+  { id: 7, name: 'Manikür & Pedikür', cat: 'Tırnak',duration: 60, price: 280,  icon: '💅',  color: '#E879A3' },
+  { id: 8, name: 'Cilt Bakımı',       cat: 'Cilt',  duration: 60, price: 300,  icon: '🌿',  color: '#52C27A' },
+  { id: 9, name: 'Masaj',             cat: 'Masaj', duration: 60, price: 500,  icon: '💆',  color: '#8B5CF6' },
+];
+
+const STAFF = [
+  { id: 0,  name: 'Fark Etmez',   title: 'İlk müsait personel', color: '#4A4A5A', initial: '?',  any: true },
+  { id: 1,  name: 'Ahmet',        title: 'Berber & Stilist',     color: '#C9A84C', initial: 'A' },
+  { id: 2,  name: 'Mehmet',       title: 'Saç Uzmanı',           color: '#00C8FF', initial: 'M' },
+  { id: 3,  name: 'Fatma',        title: 'Güzellik Uzmanı',      color: '#E879A3', initial: 'F' },
+];
+
+const TR_DAYS   = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
+const TR_MONTHS = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+
+/* ============================================================
+   STATE
+============================================================ */
+/* ============================================================
+   SALON KANAL AYARLARI
+   Gerçek sistemde bu veriler API'dan gelir.
+   Şimdilik localStorage'dan okuyoruz (dashboard ayarlarına bağlı).
+============================================================ */
+const SALON_CHANNELS = (function() {
+  try {
+    // Dashboard'da kaydedilen ayarları oku (gerçek sistemde API çağrısı olur)
+    const raw = localStorage.getItem('rd_salon_notify_cfg');
+    if (raw) return JSON.parse(raw);
+  } catch(e) {}
+  // Varsayılan: sadece WhatsApp aktif
+  return { wa: true, sms: false };
+})();
+
+const state = {
+  currentStep:    1,
+  selectedService: null,
+  selectedStaff:   null,
+  selectedDate:    null,   // Date object
+  selectedTime:    null,   // "HH:MM"
+  notifyChannel:   null,   // 'wa' | 'sms' | 'both' | 'none'
+  // Eski uyumluluk
+  get waReminder() { return this.notifyChannel === 'wa' || this.notifyChannel === 'both'; },
+};
+
+/* ============================================================
+   RENDER: SERVICES
+============================================================ */
+function renderServices() {
+  const grid = document.getElementById('service-grid');
+  grid.innerHTML = SERVICES.map(s => `
+    <div class="service-card" id="svc-${s.id}" onclick="selectService(${s.id})">
+      <div class="service-icon-wrap" style="background:${s.color}22">
+        <span>${s.icon}</span>
+      </div>
+      <div class="service-name">${s.name}</div>
+      <div class="service-meta">
+        ${s.duration ? `<span class="service-duration">⏱ ${s.duration}dk</span>` : ''}
+      </div>
+      <div class="service-price ${s.price ? '' : 'free'}">
+        ${s.price ? `₺${s.price}` : 'Serbest Fiyat'}
+      </div>
+      <div class="service-check">✓</div>
+    </div>
+  `).join('');
+}
+
+function selectService(id) {
+  state.selectedService = id;
+  document.querySelectorAll('.service-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('svc-' + id).classList.add('selected');
+  hideError('err-1');
+}
+
+/* ============================================================
+   RENDER: STAFF
+============================================================ */
+function renderStaff() {
+  const list = document.getElementById('staff-list');
+  list.innerHTML = STAFF.map(p => `
+    <div class="staff-card ${p.any ? 'staff-any' : ''}" id="stf-${p.id}" onclick="selectStaff(${p.id})">
+      <div class="staff-avatar" style="background:${p.any ? 'var(--card-bg2)' : p.color + '30'}; color:${p.color}; border: 2px solid ${p.color}40">
+        ${p.any ? '✦' : p.initial}
+      </div>
+      <div class="staff-info">
+        <div class="staff-name">${p.name}</div>
+        <div class="staff-title">${p.title}</div>
+      </div>
+      <div class="staff-card-radio"></div>
+    </div>
+  `).join('');
+}
+
+function selectStaff(id) {
+  state.selectedStaff = id;
+  document.querySelectorAll('.staff-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('stf-' + id).classList.add('selected');
+  hideError('err-2');
+}
+
+/* ============================================================
+   RENDER: DATE PILLS
+============================================================ */
+function renderDates() {
+  const scroll = document.getElementById('date-scroll');
+  const today  = new Date();
+  today.setHours(0,0,0,0);
+  scroll.innerHTML = '';
+
+  for (let i = 0; i < 14; i++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() + i);
+    const isSunday = d.getDay() === 0;
+    const isToday  = i === 0;
+
+    const pill = document.createElement('div');
+    pill.className = 'date-pill' + (isToday ? ' today' : '') + (isSunday ? ' closed' : '');
+    pill.dataset.date = d.toISOString();
+    pill.innerHTML = `
+      <div class="date-day-name">${isToday ? 'Bugün' : TR_DAYS[d.getDay()]}</div>
+      <div class="date-day-num">${d.getDate()}</div>
+      ${isSunday ? '<div class="date-closed-badge">Kapalı</div>' : ''}
+    `;
+    if (!isSunday) {
+      pill.addEventListener('click', () => selectDate(d, pill));
+    }
+    scroll.appendChild(pill);
+  }
+}
+
+function selectDate(date, pillEl) {
+  state.selectedDate = date;
+  state.selectedTime = null;
+
+  document.querySelectorAll('.date-pill').forEach(p => p.classList.remove('selected'));
+  pillEl.classList.add('selected');
+
+  renderTimeSlots(date);
+  hideError('err-3');
+}
+
+/* ============================================================
+   RENDER: TIME SLOTS
+============================================================ */
+function getUnavailable(dateStr) {
+  // Deterministically generate 4 unavailable slots per day based on date
+  const seed = dateStr.split('-').reduce((a, b) => a + Number(b), 0);
+  const all  = [];
+  for (let h = 9; h < 19; h++) {
+    for (let m = 0; m < 60; m += 30) {
+      all.push(`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`);
+    }
+  }
+  const unavail = new Set();
+  let s = seed;
+  while (unavail.size < 4) {
+    s = (s * 1664525 + 1013904223) & 0x7fffffff;
+    unavail.add(all[s % all.length]);
+  }
+  return unavail;
+}
+
+function renderTimeSlots(date) {
+  const dateStr = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+  const unavail = getUnavailable(dateStr);
+  const now     = new Date();
+  const isToday = date.toDateString() === now.toDateString();
+
+  document.getElementById('time-placeholder').style.display = 'none';
+  document.getElementById('time-grid-wrap').style.display = 'block';
+
+  const gridMorning   = document.getElementById('grid-morning');
+  const gridAfternoon = document.getElementById('grid-afternoon');
+  gridMorning.innerHTML   = '';
+  gridAfternoon.innerHTML = '';
+
+  for (let h = 9; h < 19; h++) {
+    for (let m = 0; m < 60; m += 30) {
+      const label   = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+      const isPast  = isToday && (h < now.getHours() || (h === now.getHours() && m <= now.getMinutes()));
+      const isUnavail = unavail.has(label) || isPast;
+
+      const btn = document.createElement('button');
+      btn.className = 'time-slot' + (isUnavail ? ' unavailable' : '');
+      btn.textContent = label;
+      btn.dataset.time = label;
+      if (!isUnavail) {
+        btn.addEventListener('click', () => selectTime(label, btn));
+      }
+      (h < 13 ? gridMorning : gridAfternoon).appendChild(btn);
+    }
+  }
+}
+
+function selectTime(time, btnEl) {
+  state.selectedTime = time;
+  document.querySelectorAll('.time-slot').forEach(b => b.classList.remove('selected'));
+  btnEl.classList.add('selected');
+  hideError('err-3');
+}
+
+/* ============================================================
+   STEP NAVIGATION
+============================================================ */
+const STEP_COUNT = 4;
+const PROGRESS = [12.5, 37.5, 62.5, 87.5];
+
+function updateProgress(step) {
+  document.getElementById('progress-fill').style.width = PROGRESS[step-1] + '%';
+  for (let i = 1; i <= STEP_COUNT; i++) {
+    const el = document.getElementById('ps-' + i);
+    el.classList.toggle('active', i === step);
+    el.classList.toggle('done',   i < step);
+  }
+}
+
+function showPanel(step, direction) {
+  const panels = document.querySelectorAll('.step-panel');
+  panels.forEach(p => {
+    p.classList.remove('active', 'slide-in-right', 'slide-in-left');
+  });
+  const panel = document.getElementById('panel-' + step);
+  panel.classList.add('active');
+  panel.classList.add(direction === 'forward' ? 'slide-in-right' : 'slide-in-left');
+  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function validateStep(step) {
+  if (step === 1) {
+    if (!state.selectedService) { showError('err-1'); return false; }
+  }
+  if (step === 2) {
+    if (state.selectedStaff === null) { showError('err-2'); return false; }
+  }
+  if (step === 3) {
+    if (!state.selectedDate || !state.selectedTime) { showError('err-3'); return false; }
+  }
+  return true;
+}
+
+function nextStep(from) {
+  if (!validateStep(from)) return;
+  const to = from + 1;
+  if (to === 4) { populateSummary(); renderNotifyPref(); }
+  state.currentStep = to;
+  updateProgress(to);
+  showPanel(to, 'forward');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function prevStep(from) {
+  const to = from - 1;
+  state.currentStep = to;
+  updateProgress(to);
+  showPanel(to, 'back');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showError(id) {
+  document.getElementById(id).classList.add('visible');
+}
+function hideError(id) {
+  document.getElementById(id).classList.remove('visible');
+}
+
+/* ============================================================
+   SUMMARY POPULATION
+============================================================ */
+function formatDate(d) {
+  return `${d.getDate()} ${TR_MONTHS[d.getMonth()]} ${d.getFullYear()} ${TR_DAYS[d.getDay()]}`;
+}
+
+function populateSummary() {
+  const svc   = SERVICES.find(s => s.id === state.selectedService);
+  const staff = STAFF.find(s => s.id === state.selectedStaff);
+
+  document.getElementById('sum-service').textContent = svc   ? svc.name   : '—';
+  document.getElementById('sum-staff').textContent   = staff ? staff.name : '—';
+  document.getElementById('sum-date').textContent    = state.selectedDate ? formatDate(state.selectedDate) : '—';
+  document.getElementById('sum-time').textContent    = state.selectedTime || '—';
+  document.getElementById('sum-price').textContent   = svc && svc.price ? `₺${svc.price}` : 'Serbest Fiyat';
+}
+
+/* ============================================================
+   BİLDİRİM TERCİHİ — dinamik kanal seçimi
+============================================================ */
+function renderNotifyPref() {
+  const wrap = document.getElementById('notify-pref-wrap');
+  if (!wrap) return;
+
+  const waOn  = SALON_CHANNELS.wa;
+  const smsOn = SALON_CHANNELS.sms;
+
+  // Hiçbir kanal yoksa kutuyu gizle
+  if (!waOn && !smsOn) {
+    wrap.innerHTML = '';
+    state.notifyChannel = 'none';
+    return;
+  }
+
+  // Başlangıç değeri
+  if (!state.notifyChannel) {
+    if (waOn && smsOn)  state.notifyChannel = 'wa';   // varsayılan: WA
+    else if (waOn)      state.notifyChannel = 'wa';
+    else                state.notifyChannel = 'sms';
+  }
+
+  const channels = [];
+  if (waOn)  channels.push({ key:'wa',   icon:'💬', label:'WhatsApp',       sub:'Şüpheli mesaj değil · WhatsApp app gerekir',  color:'#25d366' });
+  if (smsOn) channels.push({ key:'sms',  icon:'📱', label:'SMS',            sub:'Her telefona ulaşır · İnternet gerekmez',     color:'#4fa8ff' });
+  if (waOn && smsOn)
+             channels.push({ key:'both', icon:'💬📱',label:'Her İkisi de',  sub:'Hem WA hem SMS gönderilir · Ekstra kredi',   color:'#C9A84C' });
+             channels.push({ key:'none', icon:'🚫', label:'Bildirim İstemiyorum', sub:'Hatırlatma almak istemiyorum',          color:'#6B7280' });
+
+  wrap.innerHTML = `
+    <div style="margin-bottom:14px">
+      <div style="font-size:.78rem;font-weight:700;color:var(--form-label,#888);margin-bottom:8px">
+        📲 Bildirim Tercihi
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px" id="notify-channel-opts">
+        ${channels.map(ch => `
+          <div class="notify-ch-opt${state.notifyChannel === ch.key ? ' selected' : ''}"
+               onclick="selectNotifyChannel('${ch.key}')"
+               style="display:flex;align-items:center;gap:12px;padding:12px 14px;
+                      border-radius:12px;cursor:pointer;transition:all .18s;
+                      border:2px solid ${state.notifyChannel === ch.key ? ch.color : 'var(--border,#2a2a3a)'};
+                      background:${state.notifyChannel === ch.key ? ch.color+'18' : 'var(--surface2,#16162a)'}">
+            <div style="font-size:1.3rem;flex-shrink:0">${ch.icon}</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:.85rem;font-weight:700;color:${state.notifyChannel === ch.key ? ch.color : 'var(--form-label,#ccc)'}">${ch.label}</div>
+              <div style="font-size:.68rem;color:#888;margin-top:1px">${ch.sub}</div>
+            </div>
+            <div style="width:20px;height:20px;border-radius:50%;border:2px solid ${state.notifyChannel === ch.key ? ch.color : '#444'};
+                        background:${state.notifyChannel === ch.key ? ch.color : 'transparent'};
+                        display:flex;align-items:center;justify-content:center;
+                        font-size:.7rem;color:#080808;flex-shrink:0">
+              ${state.notifyChannel === ch.key ? '✓' : ''}
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+}
+
+function selectNotifyChannel(key) {
+  state.notifyChannel = key;
+  renderNotifyPref();
+}
+
+/* ============================================================
+   FORM VALIDATION & SUBMIT
+============================================================ */
+function submitBooking() {
+  let ok = true;
+
+  const name  = document.getElementById('inp-name').value.trim();
+  const phone = document.getElementById('inp-phone').value.trim();
+
+  if (!name) {
+    document.getElementById('inp-name').classList.add('error');
+    document.getElementById('err-name').classList.add('visible');
+    ok = false;
+  } else {
+    document.getElementById('inp-name').classList.remove('error');
+    document.getElementById('err-name').classList.remove('visible');
+  }
+
+  const phoneClean = phone.replace(/\s+/g, '');
+  if (!phone || phoneClean.length < 10) {
+    document.getElementById('inp-phone').classList.add('error');
+    document.getElementById('err-phone').classList.add('visible');
+    ok = false;
+  } else {
+    document.getElementById('inp-phone').classList.remove('error');
+    document.getElementById('err-phone').classList.remove('visible');
+  }
+
+  if (!ok) return;
+
+  showConfirmScreen(name, phone);
+}
+
+/* ============================================================
+   CONFIRMATION SCREEN
+============================================================ */
+function showConfirmScreen(name, phone) {
+  const svc   = SERVICES.find(s => s.id === state.selectedService);
+  const staff = STAFF.find(s => s.id === state.selectedStaff);
+
+  const dateStr = state.selectedDate ? formatDate(state.selectedDate) : '—';
+  const priceStr = svc && svc.price ? `₺${svc.price}` : 'Serbest Fiyat';
+
+  document.getElementById('conf-service').textContent  = svc   ? svc.name   : '—';
+  document.getElementById('conf-staff').textContent    = staff ? staff.name : '—';
+  document.getElementById('conf-datetime').textContent = `${dateStr} – ${state.selectedTime}`;
+  document.getElementById('conf-customer').textContent = name;
+  document.getElementById('conf-price').textContent    = priceStr;
+
+  // Bildirim kanalına göre Bestätigungstext anpassen
+  const ch = state.notifyChannel || 'none';
+  const notifyMsgs = {
+    wa:   'Onaylandıktan sonra <strong>WhatsApp</strong> ile bildirim alacaksınız.',
+    sms:  'Onaylandıktan sonra <strong>SMS</strong> ile bildirim alacaksınız.',
+    both: 'Onaylandıktan sonra <strong>WhatsApp ve SMS</strong> ile bildirim alacaksınız.',
+    none: 'Bildirim almayı tercih etmediniz.',
+  };
+  const notifyNotes = {
+    wa:   'Randevunuz onaylandıktan sonra WhatsApp ile hatırlatma gönderilecektir.',
+    sms:  'Randevunuz onaylandıktan sonra SMS ile hatırlatma gönderilecektir.',
+    both: 'Randevunuz için hem WhatsApp hem SMS hatırlatması gönderilecektir.',
+    none: 'Bildirim seçilmedi — salon randevunuzu onaylayacaktır.',
+  };
+  const confirmNotifyEl = document.getElementById('confirm-notify-text');
+  const confirmNoteEl   = document.getElementById('confirm-note-text');
+  if (confirmNotifyEl) confirmNotifyEl.innerHTML = notifyMsgs[ch] || notifyMsgs.none;
+  if (confirmNoteEl)   confirmNoteEl.textContent  = notifyNotes[ch] || notifyNotes.none;
+
+  // WA Onay butonu: nur bei WA oder both anzeigen
+  const waLinkEl = document.getElementById('wa-confirm-link');
+  if (waLinkEl) {
+    if (ch === 'wa' || ch === 'both') {
+      // Build WhatsApp message
+      const msg = [
+        `Merhaba, randevu almak istiyorum.`,
+        `Ad Soyad: ${name}`,
+        `Hizmet: ${svc ? svc.name : '—'}`,
+        `Personel: ${staff ? staff.name : '—'}`,
+        `Tarih: ${dateStr}`,
+        `Saat: ${state.selectedTime}`,
+        `Telefon: ${phone}`,
+        `Bildirim: WhatsApp`,
+      ].join('\n');
+      const waNumber = '902125550101'; // replace with real number
+      waLinkEl.href = `https://wa.me/${waNumber}?text=${encodeURIComponent(msg)}`;
+      waLinkEl.style.display = '';
+    } else {
+      waLinkEl.style.display = 'none';
+    }
+  }
+
+  // Save to localStorage for dashboard sync
+  const bookingData = {
+    id: Date.now(),
+    name: name,
+    phone: phone,
+    service: svc ? svc.name : '—',
+    price: svc ? (svc.price || 0) : 0,
+    staffName: staff ? staff.name : '—',
+    staffId: (state.selectedStaff === 0) ? null : (state.selectedStaff || null),
+    date: state.selectedDate ? state.selectedDate.toISOString() : null,
+    time: state.selectedTime,
+    notifyChannel: state.notifyChannel || 'none',
+    status: 'pending',
+    source: 'online',
+    createdAt: new Date().toISOString(),
+  };
+  const existing = JSON.parse(localStorage.getItem('rd_pending_bookings') || '[]');
+  existing.push(bookingData);
+  localStorage.setItem('rd_pending_bookings', JSON.stringify(existing));
+
+  // Switch screens
+  document.getElementById('screen-booking').style.display = 'none';
+  document.getElementById('screen-confirm').style.display = 'block';
+  document.getElementById('screen-confirm').classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ============================================================
+   RESET
+============================================================ */
+function resetBooking() {
+  state.currentStep     = 1;
+  state.selectedService = null;
+  state.selectedStaff   = null;
+  state.selectedDate    = null;
+  state.selectedTime    = null;
+  state.notifyChannel   = null;
+
+  document.querySelectorAll('.service-card').forEach(c => c.classList.remove('selected'));
+  document.querySelectorAll('.staff-card').forEach(c => c.classList.remove('selected'));
+  document.querySelectorAll('.date-pill').forEach(c => c.classList.remove('selected'));
+  document.getElementById('time-placeholder').style.display = 'block';
+  document.getElementById('time-grid-wrap').style.display = 'none';
+  document.getElementById('inp-name').value  = '';
+  document.getElementById('inp-phone').value = '';
+  document.getElementById('inp-email').value = '';
+  document.getElementById('inp-notes').value = '';
+  const npw = document.getElementById('notify-pref-wrap');
+  if (npw) npw.innerHTML = '';
+
+  document.getElementById('screen-confirm').style.display = 'none';
+  document.getElementById('screen-confirm').classList.remove('active');
+  document.getElementById('screen-booking').style.display = 'block';
+
+  updateProgress(1);
+  showPanel(1, 'back');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ============================================================
+   INIT
+============================================================ */
+document.addEventListener('DOMContentLoaded', () => {
+  renderServices();
+  renderStaff();
+  renderDates();
+
+  // Live WA checkbox sync with phone input
+  document.getElementById('inp-phone').addEventListener('input', function() {
+    if (this.value.trim().length > 3 && !document.getElementById('wa-toggle').classList.contains('checked')) {
+      state.waReminder = true;
+      document.getElementById('wa-toggle').classList.add('checked');
+    }
+  });
+});
+</script>
+
+<script>
+(function(){
+  var t=localStorage.getItem('rd-theme')||'dark';
+  document.documentElement.setAttribute('data-theme',t);
+  _setBookingThemeBtn(t);
+})();
+function toggleBookingTheme(){
+  var c=document.documentElement.getAttribute('data-theme')||'dark';
+  var n=c==='dark'?'light':'dark';
+  document.documentElement.setAttribute('data-theme',n);
+  localStorage.setItem('rd-theme',n);
+  _setBookingThemeBtn(n);
+}
+function _setBookingThemeBtn(t){
+  var b=document.getElementById('bk-theme-btn');
+  if(b) b.textContent=t==='dark'?'☀️':'🌙';
+}
+</script>
+
+</body>
+</html>
