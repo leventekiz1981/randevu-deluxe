@@ -1114,7 +1114,7 @@ body::before{
   background:var(--s1);
   border-top:1px solid var(--br);
   border-bottom:1px solid var(--br);
-  overflow:hidden;
+  overflow:clip;
 }
 .showcase-inner{max-width:1100px;margin:0 auto;text-align:center}
 .showcase-label{font-size:.7rem;text-transform:uppercase;letter-spacing:3px;color:var(--m2);margin-bottom:12px}
@@ -1278,8 +1278,22 @@ body::before{
   .bm-grid{grid-template-columns:1fr}
   .bm-staff-panel{display:none}
   .bm-kpis{grid-template-columns:repeat(2,1fr)}
-  .phone-mockup{margin-left:-20px;width:min(160px,38vw)}
   .showcase-labels{gap:30px}
+
+  /* Mobile: stack vertically, full width */
+  .showcase-devices{
+    flex-direction:column;
+    align-items:center;
+    gap:24px;
+  }
+  .browser-mockup{
+    width:min(100%,420px);
+  }
+  .phone-mockup{
+    margin-left:0;
+    width:min(220px,60vw);
+    align-self:center;
+  }
 }
 
 /* ── MOCKUP THEME TOGGLE BUTTONS ── */
