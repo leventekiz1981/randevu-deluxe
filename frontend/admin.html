@@ -275,6 +275,41 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-h
 ::-webkit-scrollbar{width:4px;height:4px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--s4);border-radius:2px}
+
+/* ══ MESSAGING ════════════════════════════════ */
+.msg-layout{display:grid;grid-template-columns:1fr;gap:12px}
+@media(min-width:800px){.msg-layout{grid-template-columns:300px 1fr;gap:0;background:var(--s1);border:1px solid var(--br);border-radius:14px;overflow:hidden;min-height:520px}}
+.msg-sidebar{border-right:1px solid var(--br)}
+.msg-tabs{display:flex;border-bottom:1px solid var(--br)}
+.msg-tab{flex:1;padding:11px 8px;text-align:center;font-size:.76rem;font-weight:700;cursor:pointer;border:none;background:transparent;color:var(--tx2);border-bottom:2px solid transparent;transition:all .15s;font-family:inherit}
+.msg-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.msg-list{overflow-y:auto;max-height:480px}
+.msg-row{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;cursor:pointer;border-bottom:1px solid var(--br);transition:background .12s;position:relative}
+.msg-row:hover{background:rgba(255,255,255,.025)}
+.msg-row.active{background:rgba(0,200,255,.06);border-right:2px solid var(--accent)}
+.msg-row.unread .msg-row-subject{font-weight:700;color:var(--tx)}
+.msg-unread-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);flex-shrink:0;margin-top:5px}
+.msg-av{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:.74rem;font-weight:700;color:#fff;flex-shrink:0}
+.msg-row-info{flex:1;min-width:0}
+.msg-row-from{font-size:.8rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.msg-row-subject{font-size:.76rem;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.msg-row-date{font-size:.66rem;color:var(--tx3);flex-shrink:0;margin-top:3px}
+.msg-detail{padding:20px;display:flex;flex-direction:column;gap:0}
+.msg-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;min-height:300px;color:var(--tx3);gap:10px}
+.msg-empty-icon{font-size:2.5rem;opacity:.4}
+.msg-detail-hdr{margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--br)}
+.msg-detail-subject{font-size:1rem;font-weight:700;margin-bottom:8px}
+.msg-detail-meta{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.msg-detail-from{font-size:.78rem;color:var(--tx2)}
+.msg-detail-body{font-size:.86rem;line-height:1.7;color:var(--tx2);white-space:pre-wrap}
+.msg-priority{display:inline-flex;align-items:center;gap:4px;font-size:.62rem;font-weight:700;padding:2px 8px;border-radius:5px;text-transform:uppercase;letter-spacing:.8px}
+.msg-priority.urgent{background:rgba(239,68,68,.15);color:var(--danger)}
+.msg-priority.high{background:rgba(245,158,11,.15);color:var(--orange)}
+.msg-priority.normal{background:rgba(255,255,255,.07);color:var(--tx3)}
+.msg-cat{display:inline-flex;align-items:center;gap:4px;font-size:.62rem;font-weight:700;padding:2px 8px;border-radius:5px;background:rgba(0,200,255,.1);color:var(--accent);text-transform:uppercase;letter-spacing:.8px}
+.msg-recipients{font-size:.74rem;color:var(--tx3);margin-top:10px;padding-top:10px;border-top:1px solid var(--br)}
+.compose-area{display:flex;flex-direction:column;gap:10px}
+.compose-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
   </style>
 </head>
 <body>
@@ -306,6 +341,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-h
     <button class="sb-item"        id="sb-whatsapp"    onclick="showView('whatsapp')">   <span class="sb-icon">💬</span>  WhatsApp</button>
     <button class="sb-item"        id="sb-raporlar"    onclick="showView('raporlar')">   <span class="sb-icon">📈</span>  Raporlar</button>
     <button class="sb-item"        id="sb-destek"      onclick="showView('destek')">     <span class="sb-icon">🎫</span>  Destek<span class="sb-badge-count" id="sb-ticket-count">2</span></button>
+    <button class="sb-item"        id="sb-mesajlar"    onclick="showView('mesajlar')">   <span class="sb-icon">📨</span>  Mesajlar<span class="sb-badge-count" id="sb-msg-count" style="display:none">0</span></button>
 
     <div class="sb-section">Yönetim</div>
     <button class="sb-item"        id="sb-ayarlar"     onclick="showView('ayarlar')">    <span class="sb-icon">⚙️</span>  Sistem Ayarları</button>
@@ -517,6 +553,36 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-h
     <div class="kpi green"><div class="kpi-lbl">Çözüldü (Bu Ay)</div><div class="kpi-val green">14</div></div>
   </div>
   <div id="ticket-list"></div>
+</div>
+
+<!-- ─────────────────────────────────────────
+     VIEW: MESAJLAR
+───────────────────────────────────────────── -->
+<div class="view" id="view-mesajlar">
+  <div class="page-hdr" style="margin-top:8px">
+    <div><h1>Mesajlar</h1><div class="page-hdr-sub">Salon sahipleriyle iletişim</div></div>
+    <button class="btn btn-gold btn-sm" onclick="openComposeModal()">✉️ Yeni Mesaj Gönder</button>
+  </div>
+
+  <div class="msg-layout" id="msg-layout">
+    <!-- Sol: Liste -->
+    <div class="msg-sidebar">
+      <div class="msg-tabs">
+        <button class="msg-tab active" id="msg-tab-inbox" onclick="switchMsgTab('inbox')">📥 Gelen <span id="msg-inbox-count" style="font-size:.6rem;padding:1px 5px;background:rgba(239,68,68,.2);color:var(--danger);border-radius:4px;margin-left:4px">0</span></button>
+        <button class="msg-tab" id="msg-tab-sent" onclick="switchMsgTab('sent')">📤 Gönderilenler</button>
+      </div>
+      <div class="msg-list" id="msg-list"></div>
+    </div>
+
+    <!-- Sağ: Detay -->
+    <div class="msg-detail" id="msg-detail">
+      <div class="msg-empty">
+        <div class="msg-empty-icon">📨</div>
+        <div style="font-size:.88rem;font-weight:600">Bir mesaj seçin</div>
+        <div style="font-size:.76rem">veya yeni mesaj gönderin</div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- ─────────────────────────────────────────
@@ -1000,6 +1066,62 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-h
     <div class="modal-footer">
       <button class="btn btn-ghost btn-sm" onclick="closeModal('hizmet-modal')">İptal</button>
       <button class="btn btn-gold btn-sm btn-full" onclick="saveHizmet()">💾 Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MESAJ YAZMA MODAL ══ -->
+<div class="modal-overlay" id="compose-modal" onclick="handleModalClick(event,'compose-modal')">
+  <div class="modal-sheet" style="max-width:560px">
+    <div class="modal-handle"></div>
+    <div class="modal-hdr">
+      <div class="modal-title">✉️ Mesaj Gönder</div>
+      <button class="modal-close" onclick="closeModal('compose-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <label>Alıcı</label>
+        <select class="inp inp-select" id="compose-to">
+          <option value="all">📢 Tüm Salon Sahipleri (Toplu Mesaj)</option>
+          <optgroup label="Belirli Bir Salon" id="compose-salon-options"></optgroup>
+        </select>
+      </div>
+      <div class="form-2col">
+        <div class="form-row">
+          <label>Öncelik</label>
+          <select class="inp inp-select" id="compose-priority">
+            <option value="normal">⚪ Normal</option>
+            <option value="high">🟠 Yüksek</option>
+            <option value="urgent">🔴 Acil</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>Kategori</label>
+          <select class="inp inp-select" id="compose-category">
+            <option value="info">💡 Bilgilendirme</option>
+            <option value="update">🔧 Güncelleme</option>
+            <option value="billing">💳 Faturalama</option>
+            <option value="maintenance">🛠️ Bakım</option>
+            <option value="alert">⚠️ Uyarı</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <label>Konu *</label>
+        <input class="inp" id="compose-subject" placeholder="Mesaj konusu…">
+      </div>
+      <div class="form-row">
+        <label>Mesaj *</label>
+        <textarea class="inp" id="compose-body" rows="6" style="resize:vertical" placeholder="Mesajınızı buraya yazın…"></textarea>
+      </div>
+      <div class="alert info" style="padding:8px 12px;margin-top:4px">
+        <div class="alert-icon" style="font-size:.9rem">💡</div>
+        <div class="alert-text" style="font-size:.74rem">"Tüm Salon Sahipleri" seçilirse mesaj tüm <strong id="compose-recipient-count">247</strong> aktif salona iletilir.</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('compose-modal')">İptal</button>
+      <button class="btn btn-gold btn-sm btn-full" onclick="sendAdminMessage()">📤 Gönder</button>
     </div>
   </div>
 </div>

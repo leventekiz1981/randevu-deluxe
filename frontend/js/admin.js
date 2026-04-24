@@ -209,6 +209,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderRaporlar();
   renderDestek();
   renderPlanPricesTable();
+  renderMesajlar();
 });
 
 // ══════════════════════════════════════════════
@@ -224,6 +225,7 @@ const VIEW_TITLES = {
   whatsapp:    'WhatsApp',
   raporlar:    'Raporlar',
   destek:      'Destek Talepleri',
+  mesajlar:    'Mesajlar',
   ayarlar:     'Sistem Ayarları',
 };
 
@@ -238,6 +240,8 @@ function showView(name) {
 
   const titleEl = document.getElementById('topbar-title');
   if (titleEl) titleEl.textContent = VIEW_TITLES[name] || name;
+
+  if (name === 'mesajlar') renderMesajlar();
 
   closeSidebar();
   window.scrollTo({ top:0, behavior:'smooth' });
@@ -1170,4 +1174,217 @@ function showToast(msg, type) {
 
   if (_toastTimer) clearTimeout(_toastTimer);
   _toastTimer = setTimeout(() => el.classList.remove('show'), 3200);
+}
+
+// ══════════════════════════════════════════════
+//  MESSAGING SYSTEM
+// ══════════════════════════════════════════════
+
+let ADMIN_MESSAGES = {
+  inbox: [
+    { id:1, from:"Bella Beauty",    salonId:2, subject:'WhatsApp mesajları gitmiyor',       body:'Merhaba,\n\nBugünden beri WA mesajları müşterilere ulaşmıyor. Randevular kaçırılıyor. Acil yardım lazım.',                     date:'21 Nis, 11:42', read:false, color:'#00C8FF' },
+    { id:2, from:"Ahmet's Barber",  salonId:1, subject:'Fatura indirme sorunu',             body:'Merhaba Admin,\n\nPDF faturayı indirmeye çalışıyorum ama sayfa hata veriyor. Tarayıcıda konsol hatası var.',                    date:'20 Nis, 09:15', read:true,  color:'#C9A84C' },
+    { id:3, from:"Royal Coiffure",  salonId:6, subject:'Pro pakete geçmek istiyoruz',       body:'İyi günler,\n\nPro pakete geçmek istiyoruz. Fatura nasıl kesiliyor, hangi belgeleri göndermemiz gerekiyor?',                   date:'19 Nis, 16:30', read:true,  color:'#C9A84C' },
+    { id:4, from:"Moda Saç Tasarım",salonId:5, subject:'Takvim senkronizasyon sorunu',      body:'Dashboard takviminde randevular bazen görünmüyor. Yenileyince geliyor ama müşterilerimiz bize şikayet ediyor.',                date:'18 Nis, 14:55', read:true,  color:'#00C8FF' },
+  ],
+  sent: [
+    { id:101, to:'Tüm Salon Sahipleri', subject:'🔧 Sistem Güncellemesi — v2.1',           body:'Sayın salon sahiplerimiz,\n\nBu gece 02:00–04:00 arası sistem bakımı yapılacaktır. Bu sürede panele erişim geçici olarak kesintiye uğrayabilir.\n\nAnlayışınız için teşekkürler.',   date:'18 Nis, 10:00', type:'broadcast', priority:'high',   category:'maintenance', recipients:247 },
+    { id:102, to:'Bella Beauty',         subject:'⚠️ WA Krediniz Tükeniyor',               body:'Sayın Bella Beauty,\n\nAylık WhatsApp kredinizin %87\'sini kullandınız (87/100 mesaj). Limitiniz dolmadan yeni kredi paketi satın almanızı tavsiye ederiz.',                         date:'17 Nis, 09:00', type:'direct',    priority:'high',   category:'billing',     recipients:1  },
+    { id:103, to:'Tüm Salon Sahipleri', subject:'💡 Yeni Özellik: Kampanya Modülü',        body:'Merhaba,\n\nPro ve Lüks paket kullanıcıları için yeni kampanya & indirim kodu modülü yayına girdi. Dashboard\'unuzdan "Kampanya" sekmesini ziyaret edin.',                         date:'10 Nis, 11:00', type:'broadcast', priority:'normal', category:'update',      recipients:247 },
+    { id:104, to:'Hair Studio 34',       subject:'📋 Hesabınız Hakkında Bilgi',            body:'Sayın Hair Studio 34,\n\nHesabınız şu an Ücretsiz planda. Pro pakete geçerek kasa, gelir raporları ve WA hatırlatmaları gibi özelliklere erişebilirsiniz.',                         date:'8 Nis,  14:30', type:'direct',    priority:'normal', category:'info',        recipients:1  },
+  ],
+};
+
+let _activeMsgTab = 'inbox';
+let _activeMsgId  = null;
+
+const MSG_CAT_LABELS = {
+  info:'💡 Bilgilendirme', update:'🔧 Güncelleme', billing:'💳 Faturalama',
+  maintenance:'🛠️ Bakım', alert:'⚠️ Uyarı'
+};
+const MSG_CAT_COLORS = {
+  info:'rgba(0,200,255,.1)', update:'rgba(139,92,246,.1)',
+  billing:'rgba(201,168,76,.1)', maintenance:'rgba(245,158,11,.1)', alert:'rgba(239,68,68,.1)'
+};
+const MSG_CAT_TEXT = {
+  info:'var(--accent)', update:'var(--purple)',
+  billing:'var(--gold)', maintenance:'var(--orange)', alert:'var(--danger)'
+};
+
+function renderMesajlar() {
+  _updateMsgBadge();
+  renderMsgList();
+}
+
+function _updateMsgBadge() {
+  const unread = ADMIN_MESSAGES.inbox.filter(m => !m.read).length;
+  const badge  = document.getElementById('sb-msg-count');
+  const inboxCount = document.getElementById('msg-inbox-count');
+  if (badge) { badge.textContent = unread; badge.style.display = unread > 0 ? '' : 'none'; }
+  if (inboxCount) { inboxCount.textContent = unread; inboxCount.style.display = unread > 0 ? '' : 'none'; }
+}
+
+function switchMsgTab(tab) {
+  _activeMsgTab = tab;
+  _activeMsgId  = null;
+  document.getElementById('msg-tab-inbox').classList.toggle('active', tab === 'inbox');
+  document.getElementById('msg-tab-sent').classList.toggle('active', tab === 'sent');
+  renderMsgList();
+  showMsgEmpty();
+}
+
+function renderMsgList() {
+  const list = document.getElementById('msg-list');
+  if (!list) return;
+  const messages = _activeMsgTab === 'inbox' ? ADMIN_MESSAGES.inbox : ADMIN_MESSAGES.sent;
+
+  if (!messages.length) {
+    list.innerHTML = '<div style="padding:24px;text-align:center;color:var(--tx3);font-size:.82rem">Mesaj yok</div>';
+    return;
+  }
+
+  list.innerHTML = messages.map(m => {
+    const isUnread = _activeMsgTab === 'inbox' && !m.read;
+    const initials = (m.from || m.to || '?').split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+    const color = m.color || (m.type === 'broadcast' ? '#8B5CF6' : '#00C8FF');
+    return `
+      <div class="msg-row${isUnread ? ' unread' : ''}${_activeMsgId === m.id ? ' active' : ''}" onclick="openMessage(${m.id}, '${_activeMsgTab}')">
+        ${isUnread ? '<div class="msg-unread-dot"></div>' : '<div style="width:7px"></div>'}
+        <div class="msg-av" style="background:${color}">${initials}</div>
+        <div class="msg-row-info">
+          <div class="msg-row-from">${_activeMsgTab === 'inbox' ? m.from : m.to}</div>
+          <div class="msg-row-subject">${m.subject}</div>
+        </div>
+        <div class="msg-row-date">${m.date}</div>
+      </div>`;
+  }).join('');
+}
+
+function openMessage(id, tab) {
+  _activeMsgId = id;
+  const messages = tab === 'inbox' ? ADMIN_MESSAGES.inbox : ADMIN_MESSAGES.sent;
+  const m = messages.find(x => x.id === id);
+  if (!m) return;
+
+  // Mark as read
+  if (tab === 'inbox' && !m.read) {
+    m.read = true;
+    _updateMsgBadge();
+  }
+
+  renderMsgList(); // refresh to update active state
+
+  const detail = document.getElementById('msg-detail');
+  if (!detail) return;
+
+  const priorityHtml = m.priority ? `<span class="msg-priority ${m.priority}">${m.priority === 'urgent' ? '🔴 Acil' : m.priority === 'high' ? '🟠 Yüksek' : '⚪ Normal'}</span>` : '';
+  const catHtml = m.category ? `<span class="msg-cat" style="background:${MSG_CAT_COLORS[m.category]};color:${MSG_CAT_TEXT[m.category]}">${MSG_CAT_LABELS[m.category]}</span>` : '';
+
+  const replyBtn = tab === 'inbox'
+    ? `<button class="btn btn-accent btn-sm" onclick="replyToMessage(${m.id})">↩️ Yanıtla</button>`
+    : '';
+
+  const recipientsHtml = m.recipients
+    ? `<div class="msg-recipients">📬 ${m.type === 'broadcast' ? `${m.recipients} salona gönderildi` : `${m.to} adresine gönderildi`}</div>`
+    : '';
+
+  detail.innerHTML = `
+    <div class="msg-detail-hdr">
+      <div class="msg-detail-subject">${m.subject}</div>
+      <div class="msg-detail-meta">
+        <span class="msg-detail-from">${tab === 'inbox' ? '📨 ' + m.from : '📤 ' + (m.to || 'Tüm Salonlar')} · ${m.date}</span>
+        ${priorityHtml}${catHtml}
+      </div>
+      ${recipientsHtml}
+    </div>
+    <div class="msg-detail-body">${m.body}</div>
+    <div style="margin-top:20px;display:flex;gap:8px;flex-wrap:wrap">
+      ${replyBtn}
+      ${tab === 'inbox' ? `<button class="btn btn-ghost btn-sm" onclick="deleteMessage(${m.id},'inbox')">🗑 Sil</button>` : `<button class="btn btn-ghost btn-sm" onclick="deleteMessage(${m.id},'sent')">🗑 Sil</button>`}
+    </div>`;
+}
+
+function showMsgEmpty() {
+  const detail = document.getElementById('msg-detail');
+  if (!detail) return;
+  detail.innerHTML = `
+    <div class="msg-empty">
+      <div class="msg-empty-icon">📨</div>
+      <div style="font-size:.88rem;font-weight:600">Bir mesaj seçin</div>
+      <div style="font-size:.76rem">veya yeni mesaj gönderin</div>
+    </div>`;
+}
+
+function replyToMessage(id) {
+  const m = ADMIN_MESSAGES.inbox.find(x => x.id === id);
+  if (!m) return;
+  openComposeModal(m.salonId, 'Re: ' + m.subject);
+}
+
+function deleteMessage(id, tab) {
+  if (!confirm('Bu mesaj silinsin mi?')) return;
+  if (tab === 'inbox') ADMIN_MESSAGES.inbox = ADMIN_MESSAGES.inbox.filter(x => x.id !== id);
+  else ADMIN_MESSAGES.sent = ADMIN_MESSAGES.sent.filter(x => x.id !== id);
+  _activeMsgId = null;
+  renderMsgList();
+  showMsgEmpty();
+  showToast('🗑 Mesaj silindi');
+}
+
+function openComposeModal(salonId, prefillSubject) {
+  // Populate salon options
+  const optGroup = document.getElementById('compose-salon-options');
+  if (optGroup) {
+    optGroup.innerHTML = SALONS.map(s =>
+      `<option value="${s.id}">${s.name} — ${s.city}</option>`
+    ).join('');
+  }
+  const sel = document.getElementById('compose-to');
+  if (sel && salonId) sel.value = String(salonId);
+  else if (sel) sel.value = 'all';
+
+  const subjEl = document.getElementById('compose-subject');
+  if (subjEl) subjEl.value = prefillSubject || '';
+  const bodyEl = document.getElementById('compose-body');
+  if (bodyEl) bodyEl.value = '';
+
+  const cnt = document.getElementById('compose-recipient-count');
+  if (cnt) cnt.textContent = SALONS.filter(s => s.active).length;
+
+  openModal('compose-modal');
+}
+
+function sendAdminMessage() {
+  const toVal    = document.getElementById('compose-to').value;
+  const subject  = document.getElementById('compose-subject').value.trim();
+  const body     = document.getElementById('compose-body').value.trim();
+  const priority = document.getElementById('compose-priority').value;
+  const category = document.getElementById('compose-category').value;
+
+  if (!subject) { showToast('⚠️ Konu boş bırakılamaz', 'warn'); return; }
+  if (!body)    { showToast('⚠️ Mesaj içeriği boş bırakılamaz', 'warn'); return; }
+
+  const isBroadcast = toVal === 'all';
+  const salon = !isBroadcast ? SALONS.find(s => s.id === +toVal) : null;
+  const toLabel = isBroadcast ? 'Tüm Salon Sahipleri' : (salon ? salon.name : 'Seçilen Salon');
+
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('tr-TR', { day:'numeric', month:'kısa', hour:'2-digit', minute:'2-digit' })
+    .replace(',', '');
+
+  const newMsg = {
+    id: Date.now(),
+    to: toLabel,
+    subject, body, priority, category,
+    date: now.toLocaleDateString('tr-TR', { day:'numeric', month:'short' }) + ', ' +
+          now.toLocaleTimeString('tr-TR', { hour:'2-digit', minute:'2-digit' }),
+    type: isBroadcast ? 'broadcast' : 'direct',
+    recipients: isBroadcast ? SALONS.filter(s => s.active).length : 1,
+  };
+
+  ADMIN_MESSAGES.sent.unshift(newMsg);
+  closeModal('compose-modal');
+  showView('mesajlar');
+  switchMsgTab('sent');
+  showToast(`✅ Mesaj gönderildi → ${toLabel}`, 'green');
 }

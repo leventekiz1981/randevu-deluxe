@@ -2064,7 +2064,14 @@ body { padding-bottom: 72px; background: var(--bg); color: var(--tx); }
     ">🌙 <span id="theme-lbl">Dark</span></button>
     <div class="topbar-icon-btn" onclick="openNewApptModal()" title="Yeni Randevu">➕</div>
     <div class="topbar-icon-btn" onclick="showView('ayarlar')" title="Salon Ayarları">⚙️</div>
-    <div class="topbar-icon-btn">🔔<div class="notif-dot"></div></div>
+    <div class="topbar-icon-btn" onclick="showView('mesajlar')" title="Mesajlar" style="position:relative">
+      📨
+      <div id="op-msg-badge" style="display:none;position:absolute;top:4px;right:4px;
+        width:16px;height:16px;border-radius:50%;background:var(--red);
+        font-size:.56rem;font-weight:700;color:#fff;
+        display:flex;align-items:center;justify-content:center;
+        border:1.5px solid var(--dark2)">0</div>
+    </div>
   </div>
 </div>
 
@@ -2106,6 +2113,13 @@ body { padding-bottom: 72px; background: var(--bg); color: var(--tx); }
   </button>
   <button class="desktop-nav-item" id="dnav-abonelik" onclick="showView('abonelik')">
     <span class="nav-icon">💎</span>Abonelik
+  </button>
+  <button class="desktop-nav-item" id="dnav-mesajlar" onclick="showView('mesajlar')" style="position:relative">
+    <span class="nav-icon">📨</span>Mesajlar
+    <div id="dnav-msg-badge" style="display:none;position:absolute;top:6px;right:6px;
+      width:16px;height:16px;border-radius:50%;background:var(--red);
+      font-size:.56rem;font-weight:700;color:#fff;
+      display:flex;align-items:center;justify-content:center"></div>
   </button>
   <button class="desktop-nav-item nav-bottom" id="dnav-ayarlar" onclick="showView('ayarlar')">
     <span class="nav-icon">⚙️</span>Ayarlar
@@ -3537,6 +3551,67 @@ body { padding-bottom: 72px; background: var(--bg); color: var(--tx); }
 </div>
 
 <!-- ══ VIEW: ABONELİK ══ -->
+<!-- ── MESAJLAR ── -->
+<div class="view" id="view-mesajlar">
+  <div class="sec-hdr" style="display:flex;align-items:center;justify-content:space-between">
+    <h2>📨 Mesajlar</h2>
+    <button onclick="openOperatorCompose()" style="padding:7px 14px;border-radius:9px;border:1px solid rgba(0,200,255,.25);background:rgba(0,200,255,.12);color:var(--accent);font-family:inherit;font-size:.78rem;font-weight:600;cursor:pointer">✏️ Admin'e Yaz</button>
+  </div>
+
+  <!-- Tabs -->
+  <div style="display:flex;border-bottom:1px solid var(--border);margin-bottom:12px">
+    <button class="op-msg-tab active" id="op-tab-inbox" onclick="switchOpTab('inbox')"
+      style="flex:1;padding:10px 8px;text-align:center;font-size:.78rem;font-weight:700;
+             border:none;background:transparent;color:var(--tx2);border-bottom:2px solid transparent;
+             cursor:pointer;font-family:inherit;transition:all .15s">
+      📥 Gelen Kutusu <span id="op-inbox-badge" style="display:none;font-size:.6rem;padding:1px 5px;background:rgba(239,68,68,.2);color:var(--red);border-radius:4px;margin-left:4px">0</span>
+    </button>
+    <button class="op-msg-tab" id="op-tab-sent" onclick="switchOpTab('sent')"
+      style="flex:1;padding:10px 8px;text-align:center;font-size:.78rem;font-weight:700;
+             border:none;background:transparent;color:var(--tx2);border-bottom:2px solid transparent;
+             cursor:pointer;font-family:inherit;transition:all .15s">
+      📤 Gönderilenler
+    </button>
+  </div>
+
+  <!-- Message list -->
+  <div id="op-msg-list"></div>
+
+  <!-- Message detail (shown below list on mobile) -->
+  <div id="op-msg-detail" style="display:none;margin-top:12px;background:var(--card-bg);
+    border:1px solid var(--border);border-radius:14px;padding:18px"></div>
+
+  <!-- Compose panel -->
+  <div id="op-compose-panel" style="display:none;margin-top:12px;background:var(--card-bg);
+    border:1px solid var(--border);border-radius:14px;padding:18px">
+    <div style="font-size:.88rem;font-weight:700;margin-bottom:14px;color:var(--tx)">✏️ Admin'e Mesaj Yaz</div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div>
+        <label style="font-size:.7rem;color:var(--tx2);font-weight:600;display:block;margin-bottom:4px">Konu *</label>
+        <input id="op-compose-subject" placeholder="Mesaj konusu…"
+        style="width:100%;background:var(--input-bg);border:1px solid var(--border2);border-radius:9px;
+               color:var(--tx);font-family:inherit;font-size:.84rem;padding:9px 12px;box-sizing:border-box">
+      </div>
+      <div>
+        <label style="font-size:.7rem;color:var(--tx2);font-weight:600;display:block;margin-bottom:4px">Mesaj *</label>
+        <textarea id="op-compose-body" rows="5" placeholder="Mesajınızı buraya yazın…"
+          style="width:100%;resize:vertical;background:var(--input-bg);border:1px solid var(--border2);
+                 border-radius:9px;color:var(--tx);font-family:inherit;font-size:.84rem;
+                 padding:9px 12px;box-sizing:border-box"></textarea>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button onclick="sendOperatorMessage()"
+          style="padding:8px 16px;border-radius:9px;border:1px solid rgba(0,200,255,.25);
+                 background:rgba(0,200,255,.12);color:var(--accent);font-family:inherit;
+                 font-size:.78rem;font-weight:600;cursor:pointer">📤 Gönder</button>
+        <button onclick="document.getElementById('op-compose-panel').style.display='none'"
+          style="padding:8px 14px;border-radius:9px;border:1px solid var(--border2);
+                 background:transparent;color:var(--tx2);font-family:inherit;font-size:.78rem;cursor:pointer">İptal</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="view" id="view-abonelik">
   <div class="sec-hdr">
     <h2>Abonelik & Paket</h2>
@@ -3615,6 +3690,13 @@ body { padding-bottom: 72px; background: var(--bg); color: var(--tx); }
   <button class="bottom-nav-item" id="nav-abonelik" onclick="showView('abonelik')">
     <span class="nav-icon">💎</span>
     <span>Abonelik</span>
+  </button>
+  <button class="bottom-nav-item" id="nav-mesajlar" onclick="showView('mesajlar')" style="position:relative">
+    <span class="nav-icon">📨</span><span>Mesajlar</span>
+    <div id="nav-msg-badge" style="display:none;position:absolute;top:4px;right:calc(50% - 16px);
+      width:14px;height:14px;border-radius:50%;background:var(--red);
+      font-size:.54rem;font-weight:700;color:#fff;
+      align-items:center;justify-content:center"></div>
   </button>
   <button class="bottom-nav-item" id="nav-ayarlar"   onclick="showView('ayarlar')">
     <span class="nav-icon">⚙️</span><span>Ayarlar</span>
