@@ -1388,3 +1388,187 @@ function sendAdminMessage() {
   switchMsgTab('sent');
   showToast(`✅ Mesaj gönderildi → ${toLabel}`, 'green');
 }
+
+/* ── Theme System ── */
+(function(){
+  var saved = localStorage.getItem('rd-theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', saved);
+  _updateAdminThemeBtn(saved);
+})();
+function toggleAdminTheme(){
+  var cur  = document.documentElement.getAttribute('data-theme') || 'dark';
+  var next = cur === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('rd-theme', next);
+  _updateAdminThemeBtn(next);
+}
+function _updateAdminThemeBtn(theme){
+  var icon = document.getElementById('admin-theme-icon');
+  var lbl  = document.getElementById('admin-theme-lbl');
+  if(!icon || !lbl) return;
+  if(theme === 'light'){
+    icon.textContent = '🌙'; lbl.textContent = 'Dark';
+  } else {
+    icon.textContent = '☀️'; lbl.textContent = 'Light';
+  }
+}
+
+/* ── WA Ödeme Ayarları ── */
+const WA_PAYMENT_CFG_KEY = 'rd_wa_payment_cfg';
+
+function loadWaPaymentSettings() {
+  const saved = localStorage.getItem(WA_PAYMENT_CFG_KEY);
+  if (!saved) { calcWaMargins(); return; }
+  const cfg = JSON.parse(saved);
+  const set = (id, val) => { const el = document.getElementById(id); if(el) el.value = val || ''; };
+  set('wa-bank-name',       cfg.bankName);
+  set('wa-account-holder',  cfg.accountHolder);
+  set('wa-iban',            cfg.iban);
+  set('wa-phone',           cfg.phone);
+  set('wa-payment-note',    cfg.note);
+  if (cfg.activationTime) {
+    const sel = document.getElementById('wa-activation-time');
+    if (sel) sel.value = cfg.activationTime;
+  }
+  set('wa-price-100',  cfg.prices?.[100]);
+  set('wa-price-200',  cfg.prices?.[200]);
+  set('wa-price-500',  cfg.prices?.[500]);
+  set('wa-price-1000', cfg.prices?.[1000]);
+  set('wa-cost-100',   cfg.costs?.[100]);
+  set('wa-cost-200',   cfg.costs?.[200]);
+  set('wa-cost-500',   cfg.costs?.[500]);
+  set('wa-cost-1000',  cfg.costs?.[1000]);
+  calcWaMargins();
+}
+
+function saveWaPaymentSettings() {
+  const g = id => document.getElementById(id)?.value?.trim() || '';
+  const cfg = {
+    bankName:       g('wa-bank-name'),
+    accountHolder:  g('wa-account-holder'),
+    iban:           g('wa-iban'),
+    phone:          g('wa-phone'),
+    note:           g('wa-payment-note'),
+    activationTime: g('wa-activation-time'),
+    prices: { 100: +g('wa-price-100'), 200: +g('wa-price-200'), 500: +g('wa-price-500'), 1000: +g('wa-price-1000') },
+    costs:  { 100: +g('wa-cost-100'),  200: +g('wa-cost-200'),  500: +g('wa-cost-500'),  1000: +g('wa-cost-1000')  },
+  };
+  localStorage.setItem(WA_PAYMENT_CFG_KEY, JSON.stringify(cfg));
+  showAdminMsg('✅ WA ödeme ayarları kaydedildi ve yayınlandı!', 'green');
+  calcWaMargins();
+}
+
+function calcWaMargins() {
+  [100, 200, 500, 1000].forEach(pkg => {
+    const price  = parseFloat(document.getElementById(`wa-price-${pkg}`)?.value) || 0;
+    const cost   = parseFloat(document.getElementById(`wa-cost-${pkg}`)?.value)  || 0;
+    const total  = cost * pkg;
+    const margin = price > 0 ? Math.round((price - total) / price * 100) : 0;
+    const el     = document.getElementById(`wa-margin-${pkg}`);
+    if (el) {
+      el.textContent = `%${margin}`;
+      el.style.color = margin >= 15 ? 'var(--green)' : margin >= 10 ? 'var(--orange)' : 'var(--red)';
+    }
+  });
+}
+
+function validateIban() {
+  const iban = document.getElementById('wa-iban')?.value?.replace(/\s/g,'') || '';
+  if (iban.length === 26 && iban.startsWith('TR')) {
+    showAdminMsg('✅ IBAN formatı geçerli', 'green');
+  } else {
+    showAdminMsg('⚠️ IBAN geçersiz — TR ile başlayan 26 karakter olmalı', 'red');
+  }
+}
+
+function toggleWaPreview() {
+  const box = document.getElementById('wa-preview-box');
+  if (!box) return;
+  const isOpen = box.style.display !== 'none';
+  if (isOpen) { box.style.display = 'none'; return; }
+  document.getElementById('prev-bank').textContent   = document.getElementById('wa-bank-name')?.value || '—';
+  document.getElementById('prev-holder').textContent = document.getElementById('wa-account-holder')?.value || '—';
+  document.getElementById('prev-iban').textContent   = document.getElementById('wa-iban')?.value || '—';
+  document.getElementById('prev-note').textContent   = document.getElementById('wa-payment-note')?.value || '';
+  box.style.display = 'block';
+}
+
+function showAdminMsg(msg, type) {
+  const el = document.getElementById('admin-toast');
+  if (!el) return;
+  el.textContent = msg;
+  el.style.background = type === 'green' ? '#15803D' : type === 'red' ? '#DC2626' : '#9A6D1A';
+  el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', 3000);
+}
+
+// ── SMS Ayarları ──────────────────────────────
+function loadSmsPaymentSettings() {
+  try {
+    const cfg = JSON.parse(localStorage.getItem('rd_sms_payment_cfg') || '{}');
+    const set = (id, val) => { const el = document.getElementById(id); if (el && val !== undefined) el.value = val; };
+    set('sms-bank-name',       cfg.bankName);
+    set('sms-account-holder',  cfg.accountHolder);
+    set('sms-iban',            cfg.iban);
+    set('sms-phone',           cfg.waPhone);
+    set('sms-activation-time', cfg.activationTime);
+    set('sms-payment-note',    cfg.note);
+    set('sms-price-100',  cfg.prices?.[100]);
+    set('sms-price-200',  cfg.prices?.[200]);
+    set('sms-price-500',  cfg.prices?.[500]);
+    set('sms-price-1000', cfg.prices?.[1000]);
+    calcSmsMargins();
+  } catch(e) {}
+}
+
+function saveSmsPaymentSettings() {
+  const g = id => document.getElementById(id)?.value?.trim() || '';
+  const cfg = {
+    bankName:       g('sms-bank-name'),
+    accountHolder:  g('sms-account-holder'),
+    iban:           g('sms-iban'),
+    waPhone:        g('sms-phone'),
+    activationTime: g('sms-activation-time'),
+    note:           g('sms-payment-note'),
+    prices: { 100: +g('sms-price-100'), 200: +g('sms-price-200'), 500: +g('sms-price-500'), 1000: +g('sms-price-1000') },
+  };
+  localStorage.setItem('rd_sms_payment_cfg', JSON.stringify(cfg));
+  showAdminMsg('✅ SMS ödeme ayarları kaydedildi!', 'green');
+}
+
+function calcSmsMargins() {
+  [100, 200, 500, 1000].forEach(pkg => {
+    const price  = parseFloat(document.getElementById(`sms-price-${pkg}`)?.value) || 0;
+    const cost   = parseFloat(document.getElementById(`sms-cost-${pkg}`)?.value)  || 0;
+    const totalCost = cost * pkg;
+    const margin = price > 0 ? ((price - totalCost) / price * 100).toFixed(1) : '—';
+    const el = document.getElementById(`sms-margin-${pkg}`);
+    if (el) {
+      el.textContent = price > 0 ? `%${margin} · ₺${(price - totalCost).toFixed(0)} kâr` : '—';
+      el.style.color = parseFloat(margin) >= 20 ? 'var(--green)' : parseFloat(margin) > 0 ? '#FFB830' : 'var(--red)';
+    }
+  });
+}
+
+function validateSmsIban() {
+  const iban = document.getElementById('sms-iban')?.value?.replace(/\s/g,'') || '';
+  if (iban.length === 26 && iban.startsWith('TR')) {
+    showAdminMsg('✅ IBAN formatı geçerli', 'green');
+  } else {
+    showAdminMsg('⚠️ IBAN geçersiz — TR ile başlayan 26 karakter olmalı', 'red');
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadWaPaymentSettings();
+  loadSmsPaymentSettings();
+  // Input-Änderungen → Margen live berechnen
+  [100,200,500,1000].forEach(pkg => {
+    ['price','cost'].forEach(type => {
+      const waEl = document.getElementById(`wa-${type}-${pkg}`);
+      if (waEl) waEl.addEventListener('input', calcWaMargins);
+      const smsEl = document.getElementById(`sms-${type}-${pkg}`);
+      if (smsEl) smsEl.addEventListener('input', calcSmsMargins);
+    });
+  });
+});

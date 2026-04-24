@@ -480,3 +480,18 @@ function bookSalon(salonId) {
     window.location.href = `booking.html?salon=${s.id}`;
   }
 }
+
+(function(){
+  var t=localStorage.getItem('rd-theme')||'dark';
+  document.documentElement.setAttribute('data-theme',t);
+  var b=document.getElementById('sr-theme-btn');
+  if(b) b.textContent=t==='dark'?'☀️':'🌙';
+})();
+function toggleSearchTheme(){
+  var c=document.documentElement.getAttribute('data-theme')||'dark';
+  var n=c==='dark'?'light':'dark';
+  document.documentElement.setAttribute('data-theme',n);
+  localStorage.setItem('rd-theme',n);
+  var b=document.getElementById('sr-theme-btn');
+  if(b) b.textContent=n==='dark'?'☀️':'🌙';
+}
