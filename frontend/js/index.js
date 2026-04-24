@@ -235,3 +235,37 @@ document.querySelectorAll('.faq-q').forEach(function(btn){
 
   autoTimer = setInterval(autoSwitch, 4000);
 })();
+
+/* ── SHOWCASE CONTAINER SCROLL ANIMATION ───────────────── */
+(function(){
+  var devices = document.querySelector('.showcase-devices');
+  if(!devices) return;
+
+  function update(){
+    var rect = devices.getBoundingClientRect();
+    var vh   = window.innerHeight;
+
+    // progress: 0 = bottom of viewport, 1 = element vertically centered in viewport
+    var progress = (vh - rect.top) / (vh * 0.7 + rect.height * 0.3);
+    progress = Math.min(1, Math.max(0, progress));
+
+    if(progress >= 1){
+      // Fully revealed — use class for smooth CSS transition
+      if(!devices.classList.contains('scroll-revealed')){
+        devices.classList.add('scroll-revealed');
+      }
+    } else {
+      // Still animating — drive via inline style for continuous feel
+      devices.classList.remove('scroll-revealed');
+      var rotX  = 22 * (1 - progress);
+      var scale = 0.88 + 0.12 * progress;
+      var op    = 0.5 + 0.5 * progress;
+      devices.style.transform = 'perspective(1200px) rotateX(' + rotX.toFixed(2) + 'deg) scale(' + scale.toFixed(4) + ')';
+      devices.style.opacity   = op.toFixed(3);
+    }
+  }
+
+  window.addEventListener('scroll', update, {passive:true});
+  window.addEventListener('resize', update, {passive:true});
+  update();
+})();
