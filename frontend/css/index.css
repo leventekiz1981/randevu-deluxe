@@ -860,8 +860,13 @@ body::before{
 .orbit-ring-outer .orbit-pill{ --neg-r:-225px; }
 
 /* Counter-rotate inner content so text stays upright */
+/* Step 1 — op-rot: cancels the static --deg tilt of the pill */
+.op-rot{
+  transform:rotate(calc(-1 * var(--deg))) translate(-50%,-50%);
+  display:flex;align-items:center;justify-content:center;
+}
+/* Step 2 — op-cnt: cancels the ring animation rotation */
 .op-cnt{
-  transform:translate(-50%,-50%);
   display:flex;align-items:center;justify-content:center;
   white-space:nowrap;
 }
