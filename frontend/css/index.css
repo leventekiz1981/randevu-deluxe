@@ -777,16 +777,16 @@ body::before{
 .brands-circle{
   position:relative;width:360px;height:360px;min-height:360px;
   display:grid;place-items:center;margin:0 auto;
-  background:radial-gradient(circle at center, rgba(255,255,255,.15) 0%, rgba(255,255,255,0) 55%);
+  background:transparent;
 }
 .brands-circle::before{
   content:'';position:absolute;inset:0;border-radius:50%;
   border:1px solid rgba(255,255,255,.08);
-  box-shadow:0 0 0 1px rgba(255,255,255,.02), inset 0 0 45px rgba(255,255,255,.06);
+  box-shadow:none;
 }
 [data-theme="light"] .brands-circle::before{
   border-color:rgba(0,0,0,.08);
-  box-shadow:0 0 0 1px rgba(0,0,0,.04), inset 0 0 45px rgba(0,0,0,.03);
+  box-shadow:none;
 }
 .brands-circle::after{
   content:'';position:absolute;inset:20px;border-radius:50%;
