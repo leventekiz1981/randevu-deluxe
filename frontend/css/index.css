@@ -763,7 +763,7 @@ body::before{
 /* ═══════════════════════════════════════════
    KİME UYGUN — BRANCHEN SECTION
 ═══════════════════════════════════════════ */
-.brands-section{padding:80px 20px;background:var(--bg);overflow:hidden}
+.brands-section{padding:40px 20px 24px;background:var(--bg);overflow:hidden}
 .brands-inner{max-width:1140px;margin:0 auto;text-align:center}
 .brands-top{margin-bottom:0}
 .brands-grid{
@@ -773,7 +773,7 @@ body::before{
 }
 /* ── ORBIT DIAGRAM ─────────────────────────────── */
 .orbit-wrap{
-  display:flex;justify-content:center;margin:0 auto 48px;
+  display:flex;justify-content:center;margin:0 auto 0;
 }
 .orbit-scene{
   position:relative;
