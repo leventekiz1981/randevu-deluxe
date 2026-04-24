@@ -362,12 +362,8 @@ function renderSalons(list) {
 
   emptyEl.classList.remove('visible');
 
-  const planBadge = (plan) => {
-    if (plan === 'pro')  return `<div class="salon-plan-badge badge-pro">Pro</div>`;
-    if (plan === 'lux')  return `<div class="salon-plan-badge badge-lux">Lüks</div>`;
-    if (plan === 'std')  return `<div class="salon-plan-badge badge-std">Standart</div>`;
-    return '';
-  };
+  const planBadge = () => '';
+
 
   const stars = (rating) => {
     const full  = Math.floor(rating);
@@ -405,8 +401,8 @@ function renderSalons(list) {
           <div class="salon-price-hint">
             <b>₺${s.priceFrom}</b>'den başlar
           </div>
-          <button class="btn-book ${s.waEnabled ? 'btn-wa' : ''}" onclick="event.stopPropagation(); bookSalon(${s.id})">
-            ${s.waEnabled ? '💬 WA Randevu' : '📅 Randevu Al'}
+          <button class="btn-book" onclick="event.stopPropagation(); openModal(${s.id})">
+            Daha fazla bilgi
           </button>
         </div>
       </div>
@@ -419,15 +415,10 @@ function openModal(salonId) {
   const s = SALONS_DB.find(x => x.id === salonId);
   if (!s) return;
 
-  const planLabels = { free: '', std: 'Standart', pro: 'Pro', lux: 'Lüks' };
-  const planClasses = { free: '', std: 'badge-std', pro: 'badge-pro', lux: 'badge-lux' };
-
   document.getElementById('modal-banner').style.background = s.bannerColor;
   document.getElementById('modal-banner').textContent = s.emoji;
 
-  document.getElementById('modal-plan-badge').innerHTML = s.plan !== 'free'
-    ? `<div class="salon-plan-badge ${planClasses[s.plan]}" style="position:static;display:inline-block;margin-bottom:8px">${planLabels[s.plan]}</div>`
-    : '';
+  document.getElementById('modal-plan-badge').innerHTML = '';
 
   document.getElementById('modal-name').textContent    = s.name;
   document.getElementById('modal-cat').textContent     = s.catLabel + ' · ' + s.district + ', ' + s.city;
@@ -453,7 +444,7 @@ function openModal(salonId) {
     </a>
     ${s.waEnabled ? `
     <a href="https://wa.me/${s.phone}?text=${waMsg}" target="_blank" class="modal-btn modal-btn-wa">
-      💬 WhatsApp ile Randevu
+      💬 WhatsApp ile iletişime geç
     </a>
     ` : ''}
     <a href="tel:+${s.phone}" class="modal-btn modal-btn-sec">
